@@ -266,6 +266,11 @@ const ProductListTable = () => {
     setProductos(prev => prev.filter(producto => producto.id !== id))
   }
 
+  // Handle add product
+  const handleAddProduct = (nuevoProducto: Producto) => {
+    setProductos(prev => [...prev, nuevoProducto])
+  }
+
   const columns = useMemo<ColumnDef<ProductoWithAction, any>[]>(
     () => [
       {
@@ -293,8 +298,8 @@ const ProductListTable = () => {
       columnHelper.accessor('id', {
         header: 'ID',
         cell: ({ row }) => (
-          <Typography color='text.primary' className='font-medium'>
-            #{row.original.id}
+          <Typography color='text.secondary' className='font-mono text-xs'>
+            {String(row.original.id).slice(-6)}
           </Typography>
         )
       }),
@@ -313,6 +318,14 @@ const ProductListTable = () => {
               )}
             </div>
           </div>
+        )
+      }),
+      columnHelper.accessor('sku', {
+        header: 'SKU',
+        cell: ({ row }) => (
+          <Typography color='text.primary' className='font-bold text-blue-600'>
+            {row.original.sku || '-'}
+          </Typography>
         )
       }),
       columnHelper.accessor('stock', {
@@ -526,6 +539,7 @@ const ProductListTable = () => {
       <AddProductDrawer
         open={addProductOpen}
         handleClose={() => setAddProductOpen(!addProductOpen)}
+        onAddProduct={handleAddProduct}
       />
     </>
   )

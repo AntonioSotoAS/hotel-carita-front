@@ -101,7 +101,7 @@ const FrontMenu = (props: Props) => {
             pathname === '/front-pages/landing-page'
         })}
       >
-        Home
+        Inicio
       </Typography>
       <Typography
         color='text.primary'
@@ -111,7 +111,7 @@ const FrontMenu = (props: Props) => {
           'text-primary': intersections.features
         })}
       >
-        Features
+        Habitaciones
       </Typography>
       <Typography
         color='text.primary'
@@ -121,7 +121,7 @@ const FrontMenu = (props: Props) => {
           'text-primary': intersections.team
         })}
       >
-        Team
+        Equipo
       </Typography>
       <Typography
         color='text.primary'
@@ -131,7 +131,7 @@ const FrontMenu = (props: Props) => {
           'text-primary': intersections.faq
         })}
       >
-        FAQ
+        Preguntas Frecuentes
       </Typography>
       <Typography
         color='text.primary'
@@ -141,7 +141,7 @@ const FrontMenu = (props: Props) => {
           'text-primary': intersections['contact-us']
         })}
       >
-        Contact us
+        Contacto
       </Typography>
       <DropdownMenu
         mode={mode}
@@ -152,7 +152,7 @@ const FrontMenu = (props: Props) => {
       <Typography
         component={Link}
         color='text.primary'
-        href='/'
+        href='/en/login'
         target='_blank'
         className='font-medium plb-3 pli-1.5 hover:text-primary'
       >

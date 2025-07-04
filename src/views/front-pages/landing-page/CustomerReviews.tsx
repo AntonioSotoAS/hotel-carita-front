@@ -32,84 +32,84 @@ import styles from './styles.module.css'
 // Data
 const data = [
   {
-    desc: "I've never used a theme as versatile and flexible as Hotel Carita Feliz. It's my go to for building dashboard sites on almost any project.",
+    desc: "Excelente atención y habitaciones muy cómodas. La vista al jardín desde mi habitación era hermosa. Definitivamente regresaré.",
     svg: <Pinterest color='#ee7676' />,
     rating: 5,
-    name: 'Eugenia Moore',
-    position: 'Founder of Pinterest',
+    name: 'Carmen López',
+    position: 'Ejecutiva de Marketing',
     avatarSrc: '/images/avatars/1.png'
   },
   {
-    desc: 'Materio is awesome, and I particularly enjoy knowing that if I get stuck on something.',
+    desc: "El desayuno buffet es increíble y el personal muy amable. La ubicación es perfecta para conocer la ciudad.",
     svg: <Netflix color='#d34c4d' />,
     rating: 5,
-    name: 'Tommy haffman',
-    position: 'Founder of Netflix',
+    name: 'Roberto Silva',
+    position: 'Ingeniero de Sistemas',
     avatarSrc: '/images/avatars/2.png'
   },
   {
-    desc: "This template is superior in so many ways. The code, the design, the regular updates, the support.. It's the whole package. Excellent Work.",
+    desc: "Una experiencia de lujo total. El spa es relajante y las instalaciones están impecables. Altamente recomendado.",
     svg: <Airbnb color='#FF5A60' />,
     rating: 4,
-    name: 'Eugenia Moore',
-    position: 'CTO of Airbnb',
+    name: 'Patricia Morales',
+    position: 'Directora de Ventas',
     avatarSrc: '/images/avatars/3.png'
   },
   {
-    desc: "All the requirements for developers have been taken into consideration, so I'm able to build any interface I want.",
+    desc: "El servicio a la habitación fue excelente y la atención al cliente superó mis expectativas. Un lugar para volver.",
     svg: <Coinbase color='#0199ff' />,
     rating: 5,
-    name: 'Sara Smith',
-    position: 'Founder of Coinbase',
+    name: 'Manuel Torres',
+    position: 'Consultor Financiero',
     avatarSrc: '/images/avatars/4.png'
   },
   {
-    desc: "I've never used a theme as versatile and flexible as Hotel Carita Feliz. It's my go to for building dashboard sites on almost any project.",
+    desc: "Las habitaciones son espaciosas y muy bien equipadas. El WiFi funciona perfecto para trabajar desde el hotel.",
     svg: <Dribbble color='#ea4c89' />,
     rating: 5,
-    name: 'Tommy haffman',
-    position: 'Founder of Dribble',
+    name: 'Diana Vega',
+    position: 'Diseñadora Gráfica',
     avatarSrc: '/images/avatars/5.png'
   },
   {
-    desc: "I've never used a theme as versatile and flexible as Hotel Carita Feliz. It's my go to for building dashboard sites on almost any project.",
+    desc: "La suite presidencial es espectacular. El jacuzzi y la vista panorámica hacen que valga la pena cada sol invertido.",
     svg: <Pinterest color='#ee7676' />,
     rating: 5,
-    name: 'Eugenia Moore',
-    position: 'Founder of Pinterest',
+    name: 'Alejandro Ruiz',
+    position: 'CEO de Startup',
     avatarSrc: '/images/avatars/6.png',
     color: '#2882C3'
   },
   {
-    desc: 'Materio is awesome, and I particularly enjoy knowing that if I get stuck on something.',
+    desc: "Perfecto para viajes de negocios. Las instalaciones para eventos son de primera y el personal muy profesional.",
     svg: <HubSpot color='#FF5C35' />,
     rating: 5,
-    name: 'Tommy haffman',
-    position: 'Founder of HubSpot',
+    name: 'Isabel Castro',
+    position: 'Gerente de Proyectos',
     avatarSrc: '/images/avatars/7.png'
   },
   {
-    desc: "This template is superior in so many ways. The code, the design, the regular updates, the support.. It's the whole package. Excellent Work.",
+    desc: "Un hotel que combina tradición y modernidad. La atención personalizada hace la diferencia en cada detalle.",
     svg: <Airbnb color='#FF5A60' />,
     rating: 4,
-    name: 'Eugenia Moore',
-    position: 'CTO of Airbnb',
+    name: 'Fernando Herrera',
+    position: 'Arquitecto',
     avatarSrc: '/images/avatars/8.png'
   },
   {
-    desc: "All the requirements for developers have been taken into consideration, so I'm able to build any interface I want.",
+    desc: "La limpieza es impecable y la ubicación estratégica. Cerca de todo lo que necesitas para disfrutar la ciudad.",
     svg: <Coinbase color='#0199ff' />,
     rating: 5,
-    name: 'Sara Smith',
-    position: 'Founder of Coinbase',
+    name: 'Valentina Jiménez',
+    position: 'Médica Especialista',
     avatarSrc: '/images/avatars/9.png'
   },
   {
-    desc: 'Materio is awesome, and I particularly enjoy knowing that if I get stuck on something.',
+    desc: "Cada visita es una experiencia nueva. El equipo siempre encuentra formas de sorprender y superar expectativas.",
     svg: <Dribbble color='#ea4c89' />,
     rating: 5,
-    name: 'Tommy haffman',
-    position: 'Founder of Dribbble',
+    name: 'Rodrigo Mendez',
+    position: 'Periodista',
     avatarSrc: '/images/avatars/10.png'
   }
 ]
@@ -177,19 +177,19 @@ const CustomerReviews = () => {
         className={classnames('flex max-md:flex-col max-sm:flex-wrap is-full gap-6', frontCommonStyles.layoutSpacing)}
       >
         <div className='flex flex-col gap-1 bs-full justify-center items-center lg:items-start is-full md:is-[30%] mlb-auto sm:pbs-2'>
-          <Chip label='Real Customers Reviews' variant='tonal' color='primary' size='small' className='mbe-3' />
+          <Chip label='Testimonios de Huéspedes' variant='tonal' color='primary' size='small' className='mbe-3' />
           <div className='flex flex-col gap-y-1 flex-wrap max-lg:text-center '>
             <Typography color='text.primary' variant='h4'>
               <span className='relative z-[1] font-extrabold'>
-                What people say
+                Lo que dicen nuestros
                 <img
                   src='/images/front-pages/landing-page/bg-shape.png'
                   alt='bg-shape'
                   className='absolute block-end-0 z-[1] bs-[40%] is-[132%] inline-start-[-8%] block-start-[17px]'
                 />
-              </span>
+              </span> huéspedes
             </Typography>
-            <Typography>See what our customers have to say about their experience.</Typography>
+            <Typography>Descubre las experiencias reales de quienes nos han visitado.</Typography>
           </div>
           <div className='flex gap-x-4 mbs-11'>
             <CustomIconButton color='primary' variant='tonal' onClick={() => instanceRef.current?.prev()}>

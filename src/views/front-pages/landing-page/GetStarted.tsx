@@ -41,14 +41,14 @@ const GetStarted = ({ mode }: { mode: SystemMode }) => {
         <div className='flex flex-col items-start gap-y-8 pbs-9 lg:plb-9 z-[1]'>
           <div className='flex flex-col'>
             <Typography variant='h3' color='primary' className='font-bold text-[2.125rem]'>
-              Ready to Get Started?
+              ¿Listo para reservar?
             </Typography>
             <Typography variant='h5' color='text.secondary'>
-              Start your project with a 14-day free trial
+              Reserva ahora y obtén descuentos especiales
             </Typography>
           </div>
           <Button component={Link} href='/front-pages/payment' variant='contained'>
-            Get Started
+            Hacer Reserva
           </Button>
         </div>
         <div className='flex pbs-4 lg:pbs-[60px] md:pie-4 z-[1]'>

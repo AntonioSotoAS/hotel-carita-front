@@ -26,29 +26,29 @@ type StatData = {
 // Data
 const statData: StatData[] = [
   {
-    title: 'Support Tickets Resolved',
-    value: '7.1k+',
+    title: 'Años de Experiencia',
+    value: '15+',
     svg: <LaptopCharging color='var(--mui-palette-primary-main)' />,
     color: 'var(--mui-palette-primary-darkerOpacity)',
     isHover: false
   },
   {
-    title: 'Join creatives community',
-    value: '50k+',
+    title: 'Huéspedes Satisfechos',
+    value: '10k+',
     svg: <User color='var(--mui-palette-success-main)' />,
     color: 'var(--mui-palette-success-darkerOpacity)',
     isHover: false
   },
   {
-    title: 'Highly Rated Products',
+    title: 'Calificación Promedio',
     value: '4.8/5',
     svg: <Diamond color='var(--mui-palette-info-main)' />,
     color: 'var(--mui-palette-info-darkerOpacity)',
     isHover: false
   },
   {
-    title: 'Money Back Guarantee',
-    value: '100%',
+    title: 'Habitaciones Disponibles',
+    value: '50+',
     svg: <Check color='var(--mui-palette-warning-main)' />,
     color: 'var(--mui-palette-warning-darkerOpacity)',
     isHover: false

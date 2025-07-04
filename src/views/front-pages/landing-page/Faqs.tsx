@@ -29,28 +29,28 @@ type FaqsDataTypes = {
 const FaqsData: FaqsDataTypes[] = [
   {
     id: 'panel1',
-    question: 'Do you charge for each upgrade?',
+    question: '¿Qué servicios están incluidos en el precio?',
     answer:
-      'Lemon drops chocolate cake gummies carrot cake chupa chups muffin topping. Sesame snaps icing marzipan gummi bears macaroon dragée danish caramels powder. Bear claw dragée pastry topping soufflé. Wafer gummi bears marshmallow pastry pie.'
+      'Todas nuestras habitaciones incluyen WiFi gratuito, desayuno buffet, aire acondicionado, TV por cable, acceso al gimnasio y piscina. Los servicios adicionales como spa, lavandería y room service tienen tarifas especiales.'
   },
   {
     id: 'panel2',
-    question: 'What is regular license?',
+    question: '¿Cuáles son los horarios de check-in y check-out?',
     active: true,
     answer:
-      'Regular license can be used for end products that do not charge users for access or service(access is free and there will be no monthly subscription fee). Single regular license can be used for single end product and end product can be used by you or your client. If you want to sell end product to multiple clients then you will need to purchase separate license for each client. The same rule applies if you want to use the same end product on multiple domains(unique setup). For more info on regular license you can check official description.'
+      'El check-in es a partir de las 3:00 PM y el check-out hasta las 12:00 PM. Ofrecemos servicios de check-in/out temprano o tardío bajo disponibilidad y pueden aplicar cargos adicionales. Nuestro servicio de equipaje está disponible 24/7.'
   },
   {
     id: 'panel3',
-    question: 'What is extended license?',
+    question: '¿El hotel cuenta con estacionamiento?',
     answer:
-      'Lorem ipsum dolor sit amet consectetur adipisicing elit. Nobis et aliquid quaerat possimus maxime! Mollitia reprehenderit neque repellat deleniti delectus architecto dolorum maxime, blanditiis earum ea, incidunt quam possimus cumque.'
+      'Sí, contamos con estacionamiento privado gratuito para nuestros huéspedes. El estacionamiento está vigilado las 24 horas y tiene capacidad para 80 vehículos. También ofrecemos servicio de valet parking con costo adicional.'
   },
   {
     id: 'panel4',
-    question: 'Which license is applicable for SASS application?',
+    question: '¿Permiten mascotas en el hotel?',
     answer:
-      'Lorem ipsum dolor sit amet consectetur adipisicing elit. Nobis et aliquid quaerat possimus maxime! Mollitia reprehenderit neque repellat deleniti delectus architecto dolorum maxime, blanditiis earum ea, incidunt quam possimus cumque.'
+      'Sí, somos pet-friendly. Aceptamos mascotas pequeñas y medianas (hasta 25kg) con un cargo adicional de S/ 50 por noche. Las mascotas deben estar vacunadas y con su documentación al día. Contamos con áreas especiales para el paseo de mascotas.'
   }
 ]
 
@@ -84,23 +84,23 @@ const Faqs = () => {
     <section id='faq' ref={ref} className={classnames('plb-[100px] bg-backgroundDefault', styles.sectionStartRadius)}>
       <div className={classnames('flex flex-col gap-16', frontCommonStyles.layoutSpacing)}>
         <div className='flex flex-col gap-y-4 items-center justify-center'>
-          <Chip size='small' variant='tonal' color='primary' label='FAQ' />
+          <Chip size='small' variant='tonal' color='primary' label='Preguntas Frecuentes' />
           <div className='flex flex-col items-center gap-y-1 justify-center flex-wrap'>
             <div className='flex items-center gap-x-2'>
               <Typography color='text.primary' variant='h4'>
-                Frequently asked
+                Preguntas
                 <span className='relative z-[1] font-extrabold'>
                   <img
                     src='/images/front-pages/landing-page/bg-shape.png'
                     alt='bg-shape'
                     className='absolute block-end-0 z-[1] bs-[40%] is-[132%] -inline-start-[8%] block-start-[17px]'
                   />{' '}
-                  questions
+                  frecuentes
                 </span>
               </Typography>
             </div>
             <Typography className='text-center'>
-              Browse through these FAQs to find answers to commonly asked questions.
+              Encuentra respuestas a las consultas más comunes sobre nuestros servicios.
             </Typography>
           </div>
         </div>

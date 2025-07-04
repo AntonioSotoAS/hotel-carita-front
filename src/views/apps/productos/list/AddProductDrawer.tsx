@@ -18,37 +18,33 @@ import { useForm, Controller } from 'react-hook-form'
 // Component Imports
 import CustomTextField from '@core/components/mui/TextField'
 
-// Hooks
-import { useProductos } from '@/hooks/useProductos'
-
 // Types
-import type { CrearProductoDto } from '@/types/backend.types'
+import type { Producto } from '@/types/backend.types'
 
 type Props = {
   open: boolean
   handleClose: () => void
+  onAddProduct: (producto: Producto) => void
 }
 
 type FormValidateType = {
-  name: string
-  description?: string
+  nombre: string
+  descripcion?: string
   stock: number
-  price?: number
+  precio?: number
   sku?: string
-  category?: string
-  unit?: string
-  min_stock: number
+  categoria?: string
+  stock_minimo: number
 }
 
 const AddProductDrawer = (props: Props) => {
   // Props
-  const { open, handleClose } = props
+  const { open, handleClose, onAddProduct } = props
 
   // States
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   // Hooks
-  const { crearProducto } = useProductos()
   const {
     control,
     reset: resetForm,
@@ -56,14 +52,13 @@ const AddProductDrawer = (props: Props) => {
     formState: { errors }
   } = useForm<FormValidateType>({
     defaultValues: {
-      name: '',
-      description: '',
+      nombre: '',
+      descripcion: '',
       stock: 0,
-      price: 0,
+      precio: 0,
       sku: '',
-      category: '',
-      unit: 'unidades',
-      min_stock: 5
+      categoria: '',
+      stock_minimo: 5
     }
   })
 
@@ -71,24 +66,27 @@ const AddProductDrawer = (props: Props) => {
     setIsSubmitting(true)
 
     try {
-      const productoData: CrearProductoDto = {
-        name: data.name,
-        description: data.description || undefined,
+      // Crear nuevo producto con datos locales - ID autogenerado
+      const nuevoProducto: Producto = {
+        id: Date.now(), // ID autogenerado basado en timestamp
+        nombre: data.nombre,
+        descripcion: data.descripcion || '',
         stock: data.stock,
-        price: data.price || undefined,
-        sku: data.sku || undefined,
-        category: data.category || undefined,
-        unit: data.unit || undefined,
-        min_stock: data.min_stock,
-        is_active: true
+        precio: data.precio || 0,
+        sku: data.sku || `SKU${Date.now()}`, // SKU autogenerado si no se proporciona
+        categoria: data.categoria || '',
+        stock_minimo: data.stock_minimo,
+        activo: true,
+        fechaCreacion: new Date().toISOString(),
+        fechaActualizacion: new Date().toISOString()
       }
 
-      const success = crearProducto(productoData)
+      // Llamar a la función callback para agregar el producto
+      onAddProduct(nuevoProducto)
 
-      if (success) {
-        handleClose()
-        resetForm()
-      }
+      // Cerrar drawer y resetear form
+      handleClose()
+      resetForm()
     } catch (error) {
       console.error('Error al crear producto:', error)
     } finally {
@@ -102,24 +100,14 @@ const AddProductDrawer = (props: Props) => {
   }
 
   const categorias = [
+    'Bebidas',
+    'Snacks',
+    'Dulces',
+    'Bebidas Calientes',
+    'Higiene',
+    'Comida',
     'Electrónicos',
-    'Ropa',
-    'Hogar',
-    'Deportes',
-    'Libros',
-    'Salud',
-    'Automotriz',
-    'Oficina',
     'Otros'
-  ]
-
-  const unidades = [
-    'unidades',
-    'kg',
-    'litros',
-    'metros',
-    'cajas',
-    'paquetes'
   ]
 
   return (
@@ -141,7 +129,7 @@ const AddProductDrawer = (props: Props) => {
       <div>
         <form onSubmit={handleSubmit(data => onSubmit(data))} className='flex flex-col gap-6 p-6'>
           <Controller
-            name='name'
+            name='nombre'
             control={control}
             rules={{
               required: 'Este campo es requerido',
@@ -155,14 +143,14 @@ const AddProductDrawer = (props: Props) => {
                 {...field}
                 fullWidth
                 label='Nombre del Producto *'
-                placeholder='Ej: Laptop HP'
-                {...(errors.name && { error: true, helperText: errors.name.message })}
+                placeholder='Ej: Coca Cola 500ml'
+                {...(errors.nombre && { error: true, helperText: errors.nombre.message })}
               />
             )}
           />
 
           <Controller
-            name='description'
+            name='descripcion'
             control={control}
             render={({ field }) => (
               <CustomTextField
@@ -202,7 +190,7 @@ const AddProductDrawer = (props: Props) => {
             />
 
             <Controller
-              name='min_stock'
+              name='stock_minimo'
               control={control}
               rules={{
                 required: 'Este campo es requerido',
@@ -219,7 +207,7 @@ const AddProductDrawer = (props: Props) => {
                   label='Stock Mínimo *'
                   placeholder='5'
                   inputProps={{ min: 1, step: 1 }}
-                  {...(errors.min_stock && { error: true, helperText: errors.min_stock.message })}
+                  {...(errors.stock_minimo && { error: true, helperText: errors.stock_minimo.message })}
                   onChange={(e) => field.onChange(parseInt(e.target.value) || 5)}
                 />
               )}
@@ -227,7 +215,7 @@ const AddProductDrawer = (props: Props) => {
           </div>
 
           <Controller
-            name='price'
+            name='precio'
             control={control}
             rules={{
               min: {
@@ -243,7 +231,7 @@ const AddProductDrawer = (props: Props) => {
                 label='Precio'
                 placeholder='0.00'
                 inputProps={{ min: 0, step: 0.01 }}
-                {...(errors.price && { error: true, helperText: errors.price.message })}
+                {...(errors.precio && { error: true, helperText: errors.precio.message })}
                 onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
               />
             )}
@@ -256,14 +244,14 @@ const AddProductDrawer = (props: Props) => {
               <CustomTextField
                 {...field}
                 fullWidth
-                label='SKU'
-                placeholder='Ej: LAP-HP-001'
+                label='SKU (opcional)'
+                placeholder='Ej: CC500 - Se genera automáticamente si se deja vacío'
               />
             )}
           />
 
           <Controller
-            name='category'
+            name='categoria'
             control={control}
             render={({ field }) => (
               <FormControl fullWidth>
@@ -278,26 +266,6 @@ const AddProductDrawer = (props: Props) => {
                   {categorias.map((categoria) => (
                     <MenuItem key={categoria} value={categoria}>
                       {categoria}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            )}
-          />
-
-          <Controller
-            name='unit'
-            control={control}
-            render={({ field }) => (
-              <FormControl fullWidth>
-                <InputLabel>Unidad de Medida</InputLabel>
-                <Select
-                  {...field}
-                  label='Unidad de Medida'
-                >
-                  {unidades.map((unidad) => (
-                    <MenuItem key={unidad} value={unidad}>
-                      {unidad}
                     </MenuItem>
                   ))}
                 </Select>

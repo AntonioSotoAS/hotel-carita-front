@@ -12,7 +12,7 @@ export const API_CONFIG = {
   },
 
   // Token de la API de apiperu.dev
-  TOKEN: 'TU_TOKEN_AQUI', // ⚠️ REEMPLAZAR CON TU TOKEN REAL
+  TOKEN: 'a18d194266f9398bc8b0b73c219bd0cd6545d1ac7d73b5c2c465b373a7edd08a', // ⚠️ REEMPLAZAR CON TU TOKEN REAL
 
   // URLs de la API
   DNI_URL: 'https://apiperu.dev/api/dni',

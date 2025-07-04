@@ -120,7 +120,11 @@ const VerticalMenu = ({ dictionary, scrollMenu }: Props) => {
         >
           <MenuItem href={`/${locale}/apps/clientes/list`}>Lista de Clientes</MenuItem>
         </SubMenu>
-        </Menu>
+        <SubMenu label="Pagina de Inicio" icon={<i className='tabler-files' />}>
+          <MenuItem href='/front-pages/landing-page' target='_blank'>
+            Pagina de Inicio
+          </MenuItem>
+        </SubMenu>
         {/*<SubMenu label={dictionary['navigation'].frontPages} icon={<i className='tabler-files' />}>
           <MenuItem href='/front-pages/landing-page' target='_blank'>
             {dictionary['navigation'].landing}
@@ -425,6 +429,7 @@ const VerticalMenu = ({ dictionary, scrollMenu }: Props) => {
       >
         <GenerateVerticalMenu menuData={menuData(dictionary)} />
       </Menu> */}
+      </Menu>
     </ScrollWrapper>
   )
 }

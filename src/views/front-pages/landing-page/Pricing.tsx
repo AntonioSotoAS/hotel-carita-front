@@ -27,43 +27,43 @@ import styles from './styles.module.css'
 
 const pricingPlans = [
   {
-    title: 'Basic',
+    title: 'Habitación Estándar',
     img: '/images/front-pages/landing-page/pricing-basic.png',
-    monthlyPay: 19,
-    annualPay: 14,
-    perYearPay: 168,
-    features: ['Timeline', 'Basic search', 'Live chat widget', 'Email marketing', 'Custom Forms', 'Traffic analytics'],
+    monthlyPay: 120,
+    annualPay: 90,
+    perYearPay: 32850,
+    features: ['Cama matrimonial', 'WiFi gratuito', 'Aire acondicionado', 'TV por cable', 'Baño privado', 'Desayuno incluido'],
     current: false
   },
   {
-    title: 'Team',
+    title: 'Habitación Deluxe',
     img: '/images/front-pages/landing-page/pricing-team.png',
-    monthlyPay: 29,
-    annualPay: 22,
-    perYearPay: 264,
+    monthlyPay: 180,
+    annualPay: 135,
+    perYearPay: 49275,
     features: [
-      'Everything in basic',
-      'Timeline with database',
-      'Advanced search',
-      'Marketing automation',
-      'Advanced chatbot',
-      'Campaign management'
+      'Todo de habitación estándar',
+      'Vista al jardín',
+      'Minibar incluido',
+      'Servicio a la habitación',
+      'Acceso al spa',
+      'Caja de seguridad'
     ],
     current: true
   },
   {
-    title: 'Enterprise',
+    title: 'Suite Presidencial',
     img: '/images/front-pages/landing-page/pricing-enterprise.png',
-    monthlyPay: 49,
-    annualPay: 37,
-    perYearPay: 444,
+    monthlyPay: 350,
+    annualPay: 260,
+    perYearPay: 94900,
     features: [
-      'Campaign management',
-      'Timeline with database',
-      'Fuzzy search',
-      'A/B testing sanbox',
-      'Custom permissions',
-      'Social media automation'
+      'Sala de estar separada',
+      'Vista panorámica',
+      'Jacuzzi privado',
+      'Servicio de conserjería',
+      'Check-in/out privado',
+      'Transporte incluido'
     ],
     current: false
   }
@@ -91,39 +91,39 @@ const PricingPlan = () => {
     >
       <div className={classnames('is-full', frontCommonStyles.layoutSpacing)}>
         <div className='flex flex-col gap-y-4 items-center justify-center'>
-          <Chip size='small' variant='tonal' color='primary' label='Pricing Plans' />
+          <Chip size='small' variant='tonal' color='primary' label='Nuestras Habitaciones' />
           <div className='flex flex-col items-center gap-y-1 justify-center flex-wrap'>
             <div className='flex items-center gap-x-2'>
               <Typography color='text.primary' variant='h4' className='text-center'>
                 <span className='relative z-[1] font-extrabold'>
-                  Tailored pricing plans
+                  Habitaciones diseñadas
                   <img
                     src='/images/front-pages/landing-page/bg-shape.png'
                     alt='bg-shape'
                     className='absolute block-end-0 z-[1] bs-[40%] is-[125%] sm:is-[132%] -inline-start-[10%] sm:inline-start-[-19%] block-start-[17px]'
                   />
                 </span>{' '}
-                designed for you
+                para tu comodidad
               </Typography>
             </div>
             <Typography className='text-center'>
-              All plans include 40+ advanced tools and features to boost your product.
+              Todas nuestras habitaciones incluyen servicios premium y comodidades de lujo.
               <br />
-              Choose the best plan to fit your needs.
+              Elige la habitación perfecta para tu estadía.
             </Typography>
           </div>
         </div>
         <div className='flex justify-center items-center max-sm:mlb-3 mbe-6'>
           <InputLabel htmlFor='pricing-switch' className='cursor-pointer'>
-            Pay Monthly
+            Tarifa Nocturna
           </InputLabel>
           <Switch id='pricing-switch' onChange={handleChange} checked={pricingPlan === 'annually'} />
           <InputLabel htmlFor='pricing-switch' className='cursor-pointer'>
-            Pay Annually
+            Tarifa Mensual
           </InputLabel>
           <div className='flex gap-x-1 items-start max-sm:hidden mis-2 mbe-5'>
             <img src='/images/front-pages/landing-page/pricing-arrow.png' width='50' />
-            <Typography className='font-medium'>Save 25%</Typography>
+            <Typography className='font-medium'>Ahorra 25%</Typography>
           </div>
         </div>
         <Grid container spacing={6}>
@@ -140,15 +140,15 @@ const PricingPlan = () => {
                     </Typography>
                     <div className='flex items-baseline gap-x-1'>
                       <Typography variant='h2' color='primary' className='font-extrabold'>
-                        ${pricingPlan === 'monthly' ? plan.monthlyPay : plan.annualPay}
+                        S/ {pricingPlan === 'monthly' ? plan.monthlyPay : plan.annualPay}
                       </Typography>
                       <Typography color='text.disabled' className='font-medium'>
-                        /mo
+                        {pricingPlan === 'monthly' ? '/mes' : '/noche'}
                       </Typography>
                     </div>
                     {pricingPlan === 'annually' && (
                       <Typography color='text.disabled' className='absolute block-start-[100%]'>
-                        ${plan.perYearPay} / year
+                        S/ {plan.perYearPay} / año
                       </Typography>
                     )}
                   </div>
@@ -165,7 +165,7 @@ const PricingPlan = () => {
                     </div>
                   </div>
                   <Button component={Link} href='/front-pages/payment' variant={plan.current ? 'contained' : 'tonal'}>
-                    Get Started
+                    Reservar Ahora
                   </Button>
                 </CardContent>
               </Card>
