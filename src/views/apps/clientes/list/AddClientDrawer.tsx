@@ -12,12 +12,20 @@ import FormLabel from '@mui/material/FormLabel'
 import RadioGroup from '@mui/material/RadioGroup'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import Radio from '@mui/material/Radio'
+import Card from '@mui/material/Card'
+import CardContent from '@mui/material/CardContent'
+import Alert from '@mui/material/Alert'
+import CircularProgress from '@mui/material/CircularProgress'
+import Box from '@mui/material/Box'
 
 // Third-party Imports
 import { useForm, Controller } from 'react-hook-form'
 
 // Component Imports
 import CustomTextField from '@core/components/mui/TextField'
+
+// Config Imports
+import { APIPERU_CONFIG, getAuthHeaders } from '@/config/apiperu.config'
 
 // Types
 type ClientType = {
@@ -78,18 +86,26 @@ type FormValidateType = {
   es_buen_contribuyente: string
 }
 
+type ModoEntrada = 'manual' | 'api'
+
 const AddClientDrawer = (props: Props) => {
   // Props
   const { open, handleClose, clientData, setData } = props
 
   // States
+  const [modoEntrada, setModoEntrada] = useState<ModoEntrada>('manual')
   const [tipoDocumento, setTipoDocumento] = useState<'DNI' | 'RUC'>('DNI')
+  const [documentoBusqueda, setDocumentoBusqueda] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const [apiError, setApiError] = useState<string | null>(null)
+  const [datosEncontrados, setDatosEncontrados] = useState<any>(null)
 
   // Hooks
   const {
     control,
     reset: resetForm,
     handleSubmit,
+    setValue,
     formState: { errors },
     watch
   } = useForm<FormValidateType>({
@@ -115,6 +131,105 @@ const AddClientDrawer = (props: Props) => {
   })
 
   const watchTipoDocumento = watch('tipo_documento')
+
+  // Función para consultar DNI
+  const consultarDNI = async (dni: string) => {
+    setIsLoading(true)
+    setApiError(null)
+
+    try {
+      const response = await fetch(APIPERU_CONFIG.DNI_URL, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ dni })
+      })
+
+      const result = await response.json()
+
+      if (result.success && result.data) {
+        const data = result.data
+        setDatosEncontrados(data)
+
+        // Llenar formulario automáticamente
+        setValue('numero_documento', data.numero || dni)
+        setValue('nombres', data.nombres || '')
+        setValue('apellido_paterno', data.apellido_paterno || '')
+        setValue('apellido_materno', data.apellido_materno || '')
+        setValue('codigo_verificacion', data.codigo_verificacion || '')
+      } else {
+        setApiError('No se encontraron datos para este DNI')
+      }
+    } catch (error) {
+      setApiError('Error al consultar la API. Verifica tu conexión.')
+      console.error('Error consultando DNI:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Función para consultar RUC
+  const consultarRUC = async (ruc: string) => {
+    setIsLoading(true)
+    setApiError(null)
+
+    try {
+      const response = await fetch(APIPERU_CONFIG.RUC_URL, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ ruc })
+      })
+
+      const result = await response.json()
+
+      if (result.success && result.data) {
+        const data = result.data
+        setDatosEncontrados(data)
+
+        // Llenar formulario automáticamente
+        setValue('numero_documento', data.ruc || ruc)
+        setValue('nombre_o_razon_social', data.nombre_o_razon_social || '')
+        setValue('estado', data.estado || 'ACTIVO')
+        setValue('condicion', data.condicion || 'HABIDO')
+        setValue('direccion', data.direccion || '')
+        setValue('direccion_completa', data.direccion_completa || '')
+        setValue('departamento', data.departamento || '')
+        setValue('provincia', data.provincia || '')
+        setValue('distrito', data.distrito || '')
+        setValue('ubigeo_sunat', data.ubigeo_sunat || '')
+        setValue('es_agente_de_retencion', data.es_agente_de_retencion || 'NO')
+        setValue('es_buen_contribuyente', data.es_buen_contribuyente || 'NO')
+      } else {
+        setApiError('No se encontraron datos para este RUC')
+      }
+    } catch (error) {
+      setApiError('Error al consultar la API. Verifica tu conexión.')
+      console.error('Error consultando RUC:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Función para buscar documento
+  const buscarDocumento = () => {
+    if (!documentoBusqueda) {
+      setApiError('Ingresa un número de documento')
+      return
+    }
+
+    if (tipoDocumento === 'DNI') {
+      if (!/^\d{8}$/.test(documentoBusqueda)) {
+        setApiError('El DNI debe tener 8 dígitos')
+        return
+      }
+      consultarDNI(documentoBusqueda)
+    } else {
+      if (!/^\d{11}$/.test(documentoBusqueda)) {
+        setApiError('El RUC debe tener 11 dígitos')
+        return
+      }
+      consultarRUC(documentoBusqueda)
+    }
+  }
 
   const onSubmit = (data: FormValidateType) => {
     const newClient: ClientType = {
@@ -144,53 +259,149 @@ const AddClientDrawer = (props: Props) => {
 
     setData([...(clientData ?? []), newClient])
     handleClose()
-    resetForm()
+    handleReset()
   }
 
   const handleReset = () => {
-    handleClose()
     resetForm()
+    setModoEntrada('manual')
     setTipoDocumento('DNI')
+    setDocumentoBusqueda('')
+    setApiError(null)
+    setDatosEncontrados(null)
+    setIsLoading(false)
   }
+
+  const handleClose_ = () => {
+    handleClose()
+    handleReset()
+  }
+
+  const isApiMode = modoEntrada === 'api'
+  const hasApiData = datosEncontrados !== null
 
   return (
     <Drawer
       open={open}
       anchor='right'
       variant='temporary'
-      onClose={handleReset}
+      onClose={handleClose_}
       ModalProps={{ keepMounted: true }}
       sx={{ '& .MuiDrawer-paper': { width: { xs: 300, sm: 500 } } }}
     >
       <div className='flex items-center justify-between plb-5 pli-6'>
         <Typography variant='h5'>Agregar Nuevo Cliente</Typography>
-        <IconButton size='small' onClick={handleReset}>
+        <IconButton size='small' onClick={handleClose_}>
           <i className='tabler-x text-2xl text-textPrimary' />
         </IconButton>
       </div>
       <Divider />
-      <div>
-        <form onSubmit={handleSubmit(data => onSubmit(data))} className='flex flex-col gap-6 p-6'>
-          <FormControl>
-            <FormLabel>Tipo de Documento</FormLabel>
-            <Controller
-              name='tipo_documento'
-              control={control}
-              render={({ field }) => (
-                <RadioGroup
-                  {...field}
-                  row
-                  onChange={(e) => {
-                    field.onChange(e)
-                    setTipoDocumento(e.target.value as 'DNI' | 'RUC')
-                  }}
-                >
-                  <FormControlLabel value='DNI' control={<Radio />} label='DNI - Persona Natural' />
-                  <FormControlLabel value='RUC' control={<Radio />} label='RUC - Empresa' />
-                </RadioGroup>
-              )}
-            />
-          </FormControl>
+
+      <div className='p-6'>
+        {/* Selector de modo de entrada */}
+        <Card variant='outlined' className='mb-6'>
+          <CardContent>
+            <FormControl>
+              <FormLabel>Modo de Entrada</FormLabel>
+              <RadioGroup
+                row
+                value={modoEntrada}
+                onChange={(e) => {
+                  setModoEntrada(e.target.value as ModoEntrada)
+                  setApiError(null)
+                  setDatosEncontrados(null)
+                  resetForm()
+                }}
+              >
+                <FormControlLabel value='manual' control={<Radio />} label='Manual' />
+                <FormControlLabel value='api' control={<Radio />} label='API (Automático)' />
+              </RadioGroup>
+            </FormControl>
+          </CardContent>
+        </Card>
+
+        {/* Búsqueda automática via API */}
+        {isApiMode && (
+          <Card variant='outlined' className='mb-6'>
+            <CardContent>
+              <Typography variant='h6' className='mb-4'>Búsqueda Automática</Typography>
+
+              <div className='flex flex-col gap-4'>
+                <FormControl>
+                  <FormLabel>Tipo de Documento</FormLabel>
+                  <RadioGroup
+                    row
+                    value={tipoDocumento}
+                    onChange={(e) => {
+                      setTipoDocumento(e.target.value as 'DNI' | 'RUC')
+                      setValue('tipo_documento', e.target.value as 'DNI' | 'RUC')
+                      setDocumentoBusqueda('')
+                      setApiError(null)
+                      setDatosEncontrados(null)
+                    }}
+                  >
+                    <FormControlLabel value='DNI' control={<Radio />} label='DNI' />
+                    <FormControlLabel value='RUC' control={<Radio />} label='RUC' />
+                  </RadioGroup>
+                </FormControl>
+
+                <div className='flex gap-2'>
+                  <CustomTextField
+                    fullWidth
+                    label={tipoDocumento === 'DNI' ? 'Número de DNI' : 'Número de RUC'}
+                    placeholder={tipoDocumento === 'DNI' ? '12345678' : '20123456789'}
+                    value={documentoBusqueda}
+                    onChange={(e) => setDocumentoBusqueda(e.target.value)}
+                    disabled={isLoading}
+                  />
+                  <Button
+                    variant='contained'
+                    onClick={buscarDocumento}
+                    disabled={isLoading || !documentoBusqueda}
+                    startIcon={isLoading ? <CircularProgress size={20} /> : <i className='tabler-search' />}
+                  >
+                    Buscar
+                  </Button>
+                </div>
+
+                {apiError && (
+                  <Alert severity='error'>{apiError}</Alert>
+                )}
+
+                {hasApiData && (
+                  <Alert severity='success'>
+                    ¡Datos encontrados! Los campos se han llenado automáticamente.
+                  </Alert>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Formulario */}
+        <form onSubmit={handleSubmit(data => onSubmit(data))} className='flex flex-col gap-6'>
+          {!isApiMode && (
+            <FormControl>
+              <FormLabel>Tipo de Documento</FormLabel>
+              <Controller
+                name='tipo_documento'
+                control={control}
+                render={({ field }) => (
+                  <RadioGroup
+                    {...field}
+                    row
+                    onChange={(e) => {
+                      field.onChange(e)
+                      setTipoDocumento(e.target.value as 'DNI' | 'RUC')
+                    }}
+                  >
+                    <FormControlLabel value='DNI' control={<Radio />} label='DNI - Persona Natural' />
+                    <FormControlLabel value='RUC' control={<Radio />} label='RUC - Empresa' />
+                  </RadioGroup>
+                )}
+              />
+            </FormControl>
+          )}
 
           <Controller
             name='numero_documento'
@@ -208,6 +419,7 @@ const AddClientDrawer = (props: Props) => {
                 fullWidth
                 label={watchTipoDocumento === 'DNI' ? 'Número de DNI' : 'Número de RUC'}
                 placeholder={watchTipoDocumento === 'DNI' ? '12345678' : '20123456789'}
+                disabled={isApiMode && hasApiData}
                 {...(errors.numero_documento && { error: true, helperText: errors.numero_documento.message })}
               />
             )}
@@ -225,6 +437,7 @@ const AddClientDrawer = (props: Props) => {
                     fullWidth
                     label='Nombres'
                     placeholder='Ej: Juan Carlos'
+                    disabled={isApiMode && hasApiData}
                     {...(errors.nombres && { error: true, helperText: errors.nombres.message })}
                   />
                 )}
@@ -239,6 +452,7 @@ const AddClientDrawer = (props: Props) => {
                     fullWidth
                     label='Apellido Paterno'
                     placeholder='Ej: Pérez'
+                    disabled={isApiMode && hasApiData}
                     {...(errors.apellido_paterno && { error: true, helperText: errors.apellido_paterno.message })}
                   />
                 )}
@@ -253,6 +467,7 @@ const AddClientDrawer = (props: Props) => {
                     fullWidth
                     label='Apellido Materno'
                     placeholder='Ej: García'
+                    disabled={isApiMode && hasApiData}
                     {...(errors.apellido_materno && { error: true, helperText: errors.apellido_materno.message })}
                   />
                 )}
@@ -267,6 +482,7 @@ const AddClientDrawer = (props: Props) => {
                     label='Código de Verificación'
                     placeholder='Ej: 1'
                     inputProps={{ maxLength: 1 }}
+                    disabled={isApiMode && hasApiData}
                   />
                 )}
               />
@@ -283,6 +499,7 @@ const AddClientDrawer = (props: Props) => {
                     fullWidth
                     label='Razón Social'
                     placeholder='Ej: EMPRESA DEMO S.A.C.'
+                    disabled={isApiMode && hasApiData}
                     {...(errors.nombre_o_razon_social && { error: true, helperText: errors.nombre_o_razon_social.message })}
                   />
                 )}
@@ -296,6 +513,7 @@ const AddClientDrawer = (props: Props) => {
                     fullWidth
                     select
                     label='Estado'
+                    disabled={isApiMode && hasApiData}
                     SelectProps={{ native: true }}
                   >
                     <option value='ACTIVO'>ACTIVO</option>
@@ -312,6 +530,7 @@ const AddClientDrawer = (props: Props) => {
                     fullWidth
                     select
                     label='Condición'
+                    disabled={isApiMode && hasApiData}
                     SelectProps={{ native: true }}
                   >
                     <option value='HABIDO'>HABIDO</option>
@@ -329,6 +548,7 @@ const AddClientDrawer = (props: Props) => {
                     fullWidth
                     label='Dirección'
                     placeholder='Ej: JR. ANDAHUAYLAS NRO. 100 INT. 201'
+                    disabled={isApiMode && hasApiData}
                     {...(errors.direccion && { error: true, helperText: errors.direccion.message })}
                   />
                 )}
@@ -343,6 +563,7 @@ const AddClientDrawer = (props: Props) => {
                     fullWidth
                     label='Departamento'
                     placeholder='Ej: LIMA'
+                    disabled={isApiMode && hasApiData}
                     {...(errors.departamento && { error: true, helperText: errors.departamento.message })}
                   />
                 )}
@@ -357,6 +578,7 @@ const AddClientDrawer = (props: Props) => {
                     fullWidth
                     label='Provincia'
                     placeholder='Ej: LIMA'
+                    disabled={isApiMode && hasApiData}
                     {...(errors.provincia && { error: true, helperText: errors.provincia.message })}
                   />
                 )}
@@ -371,6 +593,7 @@ const AddClientDrawer = (props: Props) => {
                     fullWidth
                     label='Distrito'
                     placeholder='Ej: MAGDALENA DEL MAR'
+                    disabled={isApiMode && hasApiData}
                     {...(errors.distrito && { error: true, helperText: errors.distrito.message })}
                   />
                 )}
@@ -384,6 +607,7 @@ const AddClientDrawer = (props: Props) => {
                     fullWidth
                     label='Ubigeo SUNAT'
                     placeholder='Ej: 150101'
+                    disabled={isApiMode && hasApiData}
                   />
                 )}
               />
@@ -391,10 +615,14 @@ const AddClientDrawer = (props: Props) => {
           )}
 
           <div className='flex items-center gap-4'>
-            <Button variant='contained' type='submit'>
+            <Button
+              variant='contained'
+              type='submit'
+              disabled={isApiMode && !hasApiData}
+            >
               Agregar Cliente
             </Button>
-            <Button variant='tonal' color='error' type='reset' onClick={() => handleReset()}>
+            <Button variant='tonal' color='error' type='reset' onClick={handleClose_}>
               Cancelar
             </Button>
           </div>

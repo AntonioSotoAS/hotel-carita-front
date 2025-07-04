@@ -20,6 +20,7 @@ type RoomType = {
   id: number
   name: string
   estado: 'ocupada' | 'vacia' | 'en-limpieza' | 'reservada'
+  precio?: number
   fechaReserva?: string
   horaReserva?: string
   fechaCheckIn?: string
@@ -40,6 +41,7 @@ type Props = {
 type FormValidateType = {
   name: string
   estado: 'ocupada' | 'vacia' | 'en-limpieza' | 'reservada'
+  precio: number
   fechaReserva?: string
   horaReserva?: string
 }
@@ -61,7 +63,8 @@ const AddRoomDrawer = (props: Props) => {
   } = useForm<FormValidateType>({
     defaultValues: {
       name: '',
-      estado: 'vacia'
+      estado: 'vacia',
+      precio: 0
     }
   })
 
@@ -77,6 +80,7 @@ const AddRoomDrawer = (props: Props) => {
       id: (roomData?.length ? Math.max(...roomData.map(r => r.id)) + 1 : 1),
       name: data.name,
       estado: data.estado,
+      precio: data.precio,
       ...(data.estado === 'reservada' && {
         fechaReserva: data.fechaReserva,
         horaReserva: data.horaReserva
@@ -85,12 +89,12 @@ const AddRoomDrawer = (props: Props) => {
 
     setData([...(roomData ?? []), newRoom])
     handleClose()
-    resetForm({ name: '', estado: 'vacia', fechaReserva: undefined, horaReserva: undefined })
+    resetForm({ name: '', estado: 'vacia', precio: 0, fechaReserva: undefined, horaReserva: undefined })
   }
 
   const handleReset = () => {
     handleClose()
-    resetForm({ name: '', estado: 'vacia', fechaReserva: undefined, horaReserva: undefined })
+    resetForm({ name: '', estado: 'vacia', precio: 0, fechaReserva: undefined, horaReserva: undefined })
   }
 
   return (
@@ -131,6 +135,31 @@ const AddRoomDrawer = (props: Props) => {
               />
             )}
           />
+
+          <Controller
+            name='precio'
+            control={control}
+            rules={{
+              required: 'Este campo es requerido',
+              min: {
+                value: 0,
+                message: 'El precio no puede ser negativo'
+              }
+            }}
+            render={({ field }) => (
+              <CustomTextField
+                {...field}
+                fullWidth
+                type='number'
+                label='Precio por Noche'
+                placeholder='Ej: 150.00'
+                inputProps={{ min: 0, step: 0.01 }}
+                {...(errors.precio && { error: true, helperText: errors.precio.message })}
+                onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+              />
+            )}
+          />
+
           <Controller
             name='estado'
             control={control}
@@ -153,44 +182,45 @@ const AddRoomDrawer = (props: Props) => {
               </CustomTextField>
             )}
           />
-                      {watchedEstado === 'reservada' && (
-              <>
-                <Controller
-                  name='fechaReserva'
-                  control={control}
-                  rules={{
-                    required: watchedEstado === 'reservada' ? 'La fecha de reserva es requerida' : false
-                  }}
-                  render={({ field }) => (
-                    <CustomTextField
-                      fullWidth
-                      label='Fecha de Reserva'
-                      type='date'
-                      InputLabelProps={{ shrink: true }}
-                      {...field}
-                      {...(errors.fechaReserva && { error: true, helperText: errors.fechaReserva.message })}
-                    />
-                  )}
-                />
-                <Controller
-                  name='horaReserva'
-                  control={control}
-                  rules={{
-                    required: watchedEstado === 'reservada' ? 'La hora de reserva es requerida' : false
-                  }}
-                  render={({ field }) => (
-                    <CustomTextField
-                      fullWidth
-                      label='Hora de Reserva'
-                      type='time'
-                      InputLabelProps={{ shrink: true }}
-                      {...field}
-                      {...(errors.horaReserva && { error: true, helperText: errors.horaReserva.message })}
-                    />
-                  )}
-                />
-              </>
-            )}
+
+          {watchedEstado === 'reservada' && (
+            <>
+              <Controller
+                name='fechaReserva'
+                control={control}
+                rules={{
+                  required: watchedEstado === 'reservada' ? 'La fecha de reserva es requerida' : false
+                }}
+                render={({ field }) => (
+                  <CustomTextField
+                    fullWidth
+                    label='Fecha de Reserva'
+                    type='date'
+                    InputLabelProps={{ shrink: true }}
+                    {...field}
+                    {...(errors.fechaReserva && { error: true, helperText: errors.fechaReserva.message })}
+                  />
+                )}
+              />
+              <Controller
+                name='horaReserva'
+                control={control}
+                rules={{
+                  required: watchedEstado === 'reservada' ? 'La hora de reserva es requerida' : false
+                }}
+                render={({ field }) => (
+                  <CustomTextField
+                    fullWidth
+                    label='Hora de Reserva'
+                    type='time'
+                    InputLabelProps={{ shrink: true }}
+                    {...field}
+                    {...(errors.horaReserva && { error: true, helperText: errors.horaReserva.message })}
+                  />
+                )}
+              />
+            </>
+          )}
           <div className='flex items-center gap-4'>
             <Button variant='contained' type='submit'>
               Agregar Habitación

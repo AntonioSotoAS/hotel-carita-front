@@ -72,6 +72,7 @@ type RoomType = {
   id: number
   name: string
   estado: 'ocupada' | 'vacia' | 'en-limpieza' | 'reservada'
+  precio?: number
   fechaReserva?: string
   horaReserva?: string
   fechaCheckIn?: string
@@ -302,7 +303,15 @@ const RoomListTable = ({ tableData }: { tableData?: RoomType[] }) => {
           </div>
         )
       }),
-            columnHelper.accessor('estado', {
+      columnHelper.accessor('precio', {
+        header: 'Precio por Noche',
+        cell: ({ row }) => (
+          <Typography color='text.primary' className='font-medium'>
+            {row.original.precio ? `S/ ${row.original.precio.toFixed(2)}` : '-'}
+          </Typography>
+        )
+      }),
+      columnHelper.accessor('estado', {
         header: 'Estado',
         cell: ({ row }) => {
           const statusDisplay = getRoomStatusDisplay(row.original.estado)

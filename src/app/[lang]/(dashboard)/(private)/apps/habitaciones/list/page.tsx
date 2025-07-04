@@ -31,17 +31,19 @@ const roomData = [
     id: 1,
     name: 'Habitación 101',
     estado: 'ocupada' as const,
+    precio: 120.00,
     huespedNombre: 'Juan Carlos Pérez',
     huespedDocumento: '75675863',
     fechaCheckIn: getToday(),
     horaCheckIn: '14:30'
   },
-  { id: 2, name: 'Habitación 102', estado: 'vacia' as const },
-  { id: 3, name: 'Habitación 103', estado: 'en-limpieza' as const },
+  { id: 2, name: 'Habitación 102', estado: 'vacia' as const, precio: 120.00 },
+  { id: 3, name: 'Habitación 103', estado: 'en-limpieza' as const, precio: 120.00 },
   {
     id: 4,
     name: 'Habitación 201',
     estado: 'ocupada' as const,
+    precio: 150.00,
     huespedNombre: 'María Fernanda López',
     huespedDocumento: '75675863',
     fechaCheckIn: getToday(),
@@ -51,15 +53,17 @@ const roomData = [
     id: 5,
     name: 'Habitación 202',
     estado: 'reservada' as const,
+    precio: 150.00,
     fechaReserva: getToday(),
     horaReserva: getNextHour()
   }, // Reserva próxima - BLOQUEADA
-  { id: 6, name: 'Suite Premium', estado: 'en-limpieza' as const },
-  { id: 7, name: 'Habitación 301', estado: 'vacia' as const },
+  { id: 6, name: 'Suite Premium', estado: 'en-limpieza' as const, precio: 300.00 },
+  { id: 7, name: 'Habitación 301', estado: 'vacia' as const, precio: 180.00 },
   {
     id: 8,
     name: 'Habitación 302',
     estado: 'reservada' as const,
+    precio: 180.00,
     fechaReserva: getToday(),
     horaReserva: getFutureTime()
   }, // Reserva lejana - NO BLOQUEADA (puede hacer check-in)
@@ -67,6 +71,7 @@ const roomData = [
     id: 9,
     name: 'Suite Ejecutiva',
     estado: 'reservada' as const,
+    precio: 350.00,
     fechaReserva: getTomorrowDate(),
     horaReserva: '12:00'
   } // Reserva mañana - NO BLOQUEADA (puede hacer check-in)

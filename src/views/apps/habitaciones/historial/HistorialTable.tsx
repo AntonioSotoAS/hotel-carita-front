@@ -1,0 +1,445 @@
+'use client'
+
+// React Imports
+import { useEffect, useState, useMemo } from 'react'
+
+// MUI Imports
+import Card from '@mui/material/Card'
+import CardHeader from '@mui/material/CardHeader'
+import Typography from '@mui/material/Typography'
+import Chip from '@mui/material/Chip'
+import { styled } from '@mui/material/styles'
+import TablePagination from '@mui/material/TablePagination'
+import type { TextFieldProps } from '@mui/material/TextField'
+import MenuItem from '@mui/material/MenuItem'
+
+// Third-party Imports
+import classnames from 'classnames'
+import { rankItem } from '@tanstack/match-sorter-utils'
+import {
+  createColumnHelper,
+  flexRender,
+  getCoreRowModel,
+  useReactTable,
+  getFilteredRowModel,
+  getFacetedRowModel,
+  getFacetedUniqueValues,
+  getFacetedMinMaxValues,
+  getPaginationRowModel,
+  getSortedRowModel
+} from '@tanstack/react-table'
+import type { ColumnDef, FilterFn } from '@tanstack/react-table'
+import type { RankingInfo } from '@tanstack/match-sorter-utils'
+
+// Type Imports
+import type { ThemeColor } from '@core/types'
+
+// Component Imports
+import TablePaginationComponent from '@components/TablePaginationComponent'
+import CustomTextField from '@core/components/mui/TextField'
+
+// Style Imports
+import tableStyles from '@core/styles/table.module.css'
+
+// Local Types
+import type { HistorialHabitacion, TipoMovimiento } from './types'
+import HistorialFilters from './HistorialFilters'
+
+declare module '@tanstack/table-core' {
+  interface FilterFns {
+    fuzzy: FilterFn<unknown>
+  }
+  interface FilterMeta {
+    itemRank: RankingInfo
+  }
+}
+
+type MovimientoColorType = {
+  [key in TipoMovimiento]: ThemeColor
+}
+
+// Datos de prueba para el historial
+const historialData: HistorialHabitacion[] = [
+  {
+    id: 1,
+    habitacionId: 101,
+    habitacionNombre: 'Habitación 101',
+    tipoMovimiento: 'check_in',
+    estadoAnterior: 'reservada',
+    estadoNuevo: 'ocupada',
+    huespedNombre: 'Juan Pérez',
+    huespedDocumento: '12345678',
+    fecha: '2024-01-15',
+    hora: '14:30',
+    observaciones: 'Check-in normal',
+    usuario: 'Recepcionista 1'
+  },
+  {
+    id: 2,
+    habitacionId: 102,
+    habitacionNombre: 'Habitación 102',
+    tipoMovimiento: 'cambio_estado',
+    estadoAnterior: 'ocupada',
+    estadoNuevo: 'en-limpieza',
+    fecha: '2024-01-15',
+    hora: '11:00',
+    observaciones: 'Requiere limpieza profunda',
+    usuario: 'Ama de llaves'
+  },
+  {
+    id: 3,
+    habitacionId: 101,
+    habitacionNombre: 'Habitación 101',
+    tipoMovimiento: 'check_out',
+    estadoAnterior: 'ocupada',
+    estadoNuevo: 'en-limpieza',
+    huespedNombre: 'Juan Pérez',
+    huespedDocumento: '12345678',
+    fecha: '2024-01-16',
+    hora: '12:00',
+    observaciones: 'Check-out normal',
+    usuario: 'Recepcionista 2'
+  },
+  {
+    id: 4,
+    habitacionId: 103,
+    habitacionNombre: 'Habitación 103',
+    tipoMovimiento: 'reserva',
+    estadoAnterior: 'vacia',
+    estadoNuevo: 'reservada',
+    huespedNombre: 'María García',
+    huespedDocumento: '87654321',
+    fecha: '2024-01-16',
+    hora: '16:45',
+    observaciones: 'Reserva para el 18/01',
+    usuario: 'Recepcionista 1'
+  },
+  {
+    id: 5,
+    habitacionId: 102,
+    habitacionNombre: 'Habitación 102',
+    tipoMovimiento: 'cambio_estado',
+    estadoAnterior: 'en-limpieza',
+    estadoNuevo: 'vacia',
+    fecha: '2024-01-16',
+    hora: '15:30',
+    observaciones: 'Limpieza completada',
+    usuario: 'Ama de llaves'
+  },
+  {
+    id: 6,
+    habitacionId: 104,
+    habitacionNombre: 'Habitación 104',
+    tipoMovimiento: 'cancelacion',
+    estadoAnterior: 'reservada',
+    estadoNuevo: 'vacia',
+    huespedNombre: 'Carlos López',
+    huespedDocumento: '11223344',
+    fecha: '2024-01-17',
+    hora: '09:15',
+    observaciones: 'Cliente canceló la reserva',
+    usuario: 'Recepcionista 2'
+  }
+]
+
+// Styled Components
+const Icon = styled('i')({})
+
+const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
+  const itemRank = rankItem(row.getValue(columnId), value)
+  addMeta({ itemRank })
+  return itemRank.passed
+}
+
+const DebouncedInput = ({
+  value: initialValue,
+  onChange,
+  debounce = 500,
+  ...props
+}: {
+  value: string | number
+  onChange: (value: string | number) => void
+  debounce?: number
+} & Omit<TextFieldProps, 'onChange'>) => {
+  const [value, setValue] = useState(initialValue)
+
+  useEffect(() => {
+    setValue(initialValue)
+  }, [initialValue])
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      onChange(value)
+    }, debounce)
+
+    return () => clearTimeout(timeout)
+  }, [value])
+
+  return <CustomTextField {...props} value={value} onChange={e => setValue(e.target.value)} />
+}
+
+// Vars
+const movimientoColorObj: MovimientoColorType = {
+  'check_in': 'success',
+  'check_out': 'info',
+  'cambio_estado': 'warning',
+  'reserva': 'primary',
+  'cancelacion': 'error'
+}
+
+const movimientoLabelObj: Record<TipoMovimiento, string> = {
+  'check_in': 'Check-In',
+  'check_out': 'Check-Out',
+  'cambio_estado': 'Cambio Estado',
+  'reserva': 'Reserva',
+  'cancelacion': 'Cancelación'
+}
+
+// Column Definitions
+const columnHelper = createColumnHelper<HistorialHabitacion>()
+
+const HistorialTable = () => {
+  // States
+  const [filteredData, setFilteredData] = useState<HistorialHabitacion[]>(historialData)
+  const [globalFilter, setGlobalFilter] = useState('')
+
+  // Update filtered data when historialData changes
+  useEffect(() => {
+    setFilteredData(historialData)
+  }, [])
+
+  const columns = useMemo<ColumnDef<HistorialHabitacion, any>[]>(
+    () => [
+      columnHelper.accessor('fecha', {
+        header: 'Fecha',
+        cell: ({ row }) => (
+          <div className='flex flex-col'>
+            <Typography color='text.primary' className='font-medium'>
+              {new Date(row.original.fecha).toLocaleDateString('es-ES')}
+            </Typography>
+            <Typography variant='body2' color='text.secondary'>
+              {row.original.hora}
+            </Typography>
+          </div>
+        )
+      }),
+      columnHelper.accessor('habitacionNombre', {
+        header: 'Habitación',
+        cell: ({ row }) => (
+          <Typography color='text.primary' className='font-medium'>
+            {row.original.habitacionNombre}
+          </Typography>
+        )
+      }),
+      columnHelper.accessor('tipoMovimiento', {
+        header: 'Tipo de Movimiento',
+        cell: ({ row }) => (
+          <Chip
+            variant='tonal'
+            label={movimientoLabelObj[row.original.tipoMovimiento]}
+            size='small'
+            color={movimientoColorObj[row.original.tipoMovimiento]}
+            className='capitalize'
+          />
+        )
+      }),
+      columnHelper.accessor('estadoAnterior', {
+        header: 'Cambio de Estado',
+        cell: ({ row }) => (
+          <div className='flex items-center gap-2'>
+            {row.original.estadoAnterior && (
+              <>
+                <Chip
+                  variant='outlined'
+                  label={row.original.estadoAnterior}
+                  size='small'
+                  className='capitalize'
+                />
+                <Icon className='tabler-arrow-right text-textSecondary' />
+                <Chip
+                  variant='tonal'
+                  label={row.original.estadoNuevo}
+                  size='small'
+                  color='primary'
+                  className='capitalize'
+                />
+              </>
+            )}
+            {!row.original.estadoAnterior && row.original.estadoNuevo && (
+              <Chip
+                variant='tonal'
+                label={row.original.estadoNuevo}
+                size='small'
+                color='primary'
+                className='capitalize'
+              />
+            )}
+          </div>
+        )
+      }),
+      columnHelper.accessor('huespedNombre', {
+        header: 'Huésped',
+        cell: ({ row }) => (
+          <div className='flex flex-col'>
+            {row.original.huespedNombre && (
+              <>
+                <Typography color='text.primary' className='font-medium'>
+                  {row.original.huespedNombre}
+                </Typography>
+                <Typography variant='body2' color='text.secondary'>
+                  {row.original.huespedDocumento}
+                </Typography>
+              </>
+            )}
+            {!row.original.huespedNombre && (
+              <Typography color='text.secondary'>-</Typography>
+            )}
+          </div>
+        )
+      }),
+      columnHelper.accessor('observaciones', {
+        header: 'Observaciones',
+        cell: ({ row }) => (
+          <Typography color='text.primary' className='max-w-xs truncate'>
+            {row.original.observaciones || '-'}
+          </Typography>
+        )
+      }),
+      columnHelper.accessor('usuario', {
+        header: 'Usuario',
+        cell: ({ row }) => (
+          <Typography color='text.primary'>
+            {row.original.usuario || '-'}
+          </Typography>
+        )
+      })
+    ],
+    []
+  )
+
+  const table = useReactTable({
+    data: filteredData,
+    columns,
+    filterFns: {
+      fuzzy: fuzzyFilter
+    },
+    state: {
+      globalFilter
+    },
+    initialState: {
+      pagination: {
+        pageSize: 10
+      },
+      sorting: [
+        {
+          id: 'fecha',
+          desc: true
+        }
+      ]
+    },
+    globalFilterFn: fuzzyFilter,
+    getCoreRowModel: getCoreRowModel(),
+    onGlobalFilterChange: setGlobalFilter,
+    getFilteredRowModel: getFilteredRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getFacetedRowModel: getFacetedRowModel(),
+    getFacetedUniqueValues: getFacetedUniqueValues(),
+    getFacetedMinMaxValues: getFacetedMinMaxValues()
+  })
+
+  return (
+    <>
+      <Card>
+        <CardHeader title='Filtros' className='pbe-4' />
+        <HistorialFilters setData={setFilteredData} historialData={historialData} />
+        <div className='flex justify-between flex-col items-start md:flex-row md:items-center p-6 border-bs gap-4'>
+          <CustomTextField
+            select
+            value={table.getState().pagination.pageSize}
+            onChange={e => table.setPageSize(Number(e.target.value))}
+            className='max-sm:is-full sm:is-[70px]'
+          >
+            <MenuItem value='10'>10</MenuItem>
+            <MenuItem value='25'>25</MenuItem>
+            <MenuItem value='50'>50</MenuItem>
+          </CustomTextField>
+          <div className='flex flex-col sm:flex-row max-sm:is-full items-start sm:items-center gap-4'>
+            <DebouncedInput
+              value={globalFilter ?? ''}
+              onChange={value => setGlobalFilter(String(value))}
+              placeholder='Buscar en historial'
+              className='max-sm:is-full'
+            />
+          </div>
+        </div>
+        <div className='overflow-x-auto'>
+          <table className={tableStyles.table}>
+            <thead>
+              {table.getHeaderGroups().map(headerGroup => (
+                <tr key={headerGroup.id}>
+                  {headerGroup.headers.map(header => (
+                    <th key={header.id}>
+                      {header.isPlaceholder ? null : (
+                        <>
+                          <div
+                            className={classnames({
+                              'flex items-center': header.column.getIsSorted(),
+                              'cursor-pointer select-none': header.column.getCanSort()
+                            })}
+                            onClick={header.column.getToggleSortingHandler()}
+                          >
+                            {flexRender(header.column.columnDef.header, header.getContext())}
+                            {{
+                              asc: <i className='tabler-chevron-up text-xl' />,
+                              desc: <i className='tabler-chevron-down text-xl' />
+                            }[header.column.getIsSorted() as 'asc' | 'desc'] ?? null}
+                          </div>
+                        </>
+                      )}
+                    </th>
+                  ))}
+                </tr>
+              ))}
+            </thead>
+            {table.getFilteredRowModel().rows.length === 0 ? (
+              <tbody>
+                <tr>
+                  <td colSpan={table.getVisibleFlatColumns().length} className='text-center'>
+                    No hay registros de historial disponibles
+                  </td>
+                </tr>
+              </tbody>
+            ) : (
+              <tbody>
+                {table
+                  .getRowModel()
+                  .rows.slice(0, table.getState().pagination.pageSize)
+                  .map(row => {
+                    return (
+                      <tr key={row.id}>
+                        {row.getVisibleCells().map(cell => (
+                          <td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>
+                        ))}
+                      </tr>
+                    )
+                  })}
+              </tbody>
+            )}
+          </table>
+        </div>
+        <TablePagination
+          component={() => <TablePaginationComponent table={table} />}
+          count={table.getFilteredRowModel().rows.length}
+          rowsPerPage={table.getState().pagination.pageSize}
+          page={table.getState().pagination.pageIndex}
+          onPageChange={(_, page) => {
+            table.setPageIndex(page)
+          }}
+        />
+      </Card>
+    </>
+  )
+}
+
+export default HistorialTable

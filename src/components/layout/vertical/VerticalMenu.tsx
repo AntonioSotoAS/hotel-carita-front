@@ -112,7 +112,7 @@ const VerticalMenu = ({ dictionary, scrollMenu }: Props) => {
           label="Habitaciones"
           icon={<i className='tabler-bed' />}
         >
-          <MenuItem href={`/${locale}/apps/habitaciones/list`}>Lista de Habitaciones</MenuItem>
+          <MenuItem href={`/${locale}/apps/habitaciones/list`}>Habitaciones</MenuItem>
         </SubMenu>
         <SubMenu
           label="Clientes"

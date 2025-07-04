@@ -175,9 +175,6 @@ const Customizer = ({ breakpoint = 'lg', dir = 'ltr', disableDirection = false }
           [styles.smallScreen]: isMobileScreen
         })}
       >
-        <div className={styles.toggler} onClick={handleToggle}>
-          <i className='tabler-settings text-[22px]' />
-        </div>
         <div className={styles.header}>
           <div className='flex flex-col'>
             <h4 className={styles.customizerTitle}>Theme Customizer</h4>

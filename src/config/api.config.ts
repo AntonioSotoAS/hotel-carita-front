@@ -9,6 +9,19 @@ export const API_CONFIG = {
     HABITACIONES: '/habitaciones',
     CLIENTES: '/clientes',
     AUTH: '/auth'
+  },
+
+  // Token de la API de apiperu.dev
+  TOKEN: 'TU_TOKEN_AQUI', // ⚠️ REEMPLAZAR CON TU TOKEN REAL
+
+  // URLs de la API
+  DNI_URL: 'https://apiperu.dev/api/dni',
+  RUC_URL: 'https://apiperu.dev/api/ruc',
+
+  // Headers por defecto
+  HEADERS: {
+    'Accept': 'application/json',
+    'Content-Type': 'application/json'
   }
 }
 
@@ -26,3 +39,9 @@ export const PROD_CONFIG = {
 
 // Configuración actual basada en el entorno
 export const CURRENT_CONFIG = process.env.NODE_ENV === 'production' ? PROD_CONFIG : DEV_CONFIG
+
+// Función para obtener headers con autorización
+export const getAuthHeaders = () => ({
+  ...API_CONFIG.HEADERS,
+  'Authorization': `Bearer ${API_CONFIG.TOKEN}`
+})

@@ -47,8 +47,8 @@ const LogoText = styled.span<LogoTextProps>`
 
 const Logo = ({
   color,
-  width = 250,
-  height = 250,
+  width = 200,
+  height = 200,
   showText = true
 }: {
   color?: CSSProperties['color']
