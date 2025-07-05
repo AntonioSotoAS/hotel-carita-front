@@ -82,12 +82,12 @@ const Header = ({ mode }: { mode: Mode }) => {
               <Button
                 component={Link}
                 variant='contained'
-                href='https://1.envato.market/vuexy_admin'
+                href='/en/login'
                 startIcon={<i className='tabler-shopping-cart text-xl' />}
                 className='whitespace-nowrap'
                 target='_blank'
               >
-                Purchase Now
+                Iniciar Sesión
               </Button>
             )}
           </div>
