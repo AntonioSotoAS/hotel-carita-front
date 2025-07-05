@@ -55,6 +55,9 @@ import { getLocalizedUrl } from '@/utils/i18n'
 // Style Imports
 import tableStyles from '@core/styles/table.module.css'
 
+// Context Imports
+import { useClientes, type Cliente } from '@/contexts/ClientesContext'
+
 declare module '@tanstack/table-core' {
   interface FilterFns {
     fuzzy: FilterFn<unknown>
@@ -65,34 +68,7 @@ declare module '@tanstack/table-core' {
 }
 
 // Types
-type ClientType = {
-  id: number
-  tipo_documento: 'DNI' | 'RUC'
-  numero_documento: string
-
-  // Datos para DNI (persona natural)
-  nombres?: string
-  apellido_paterno?: string
-  apellido_materno?: string
-  nombre_completo?: string
-  codigo_verificacion?: string
-
-  // Datos para RUC (empresa)
-  nombre_o_razon_social?: string
-  estado?: string
-  condicion?: string
-  direccion?: string
-  direccion_completa?: string
-  departamento?: string
-  provincia?: string
-  distrito?: string
-  ubigeo_sunat?: string
-  ubigeo?: string[]
-  es_agente_de_retencion?: string
-  es_buen_contribuyente?: string
-}
-
-type ClientTypeWithAction = ClientType & {
+type ClientTypeWithAction = Cliente & {
   action?: string
 }
 
@@ -154,19 +130,26 @@ const clientStatusObj: ClientStatusType = {
 // Column Definitions
 const columnHelper = createColumnHelper<ClientTypeWithAction>()
 
-const ClientListTable = ({ tableData }: { tableData?: ClientType[] }) => {
+const ClientListTable = ({ tableData }: { tableData?: Cliente[] }) => {
+  // Context
+  const { clientes: clientesData, eliminarCliente } = useClientes()
+
   // States
   const [addClientOpen, setAddClientOpen] = useState(false)
   const [rowSelection, setRowSelection] = useState({})
-  const [data, setData] = useState(...[tableData])
-  const [filteredData, setFilteredData] = useState(data)
+  const [filteredData, setFilteredData] = useState<Cliente[]>(clientesData)
   const [globalFilter, setGlobalFilter] = useState('')
 
   // Hooks
   const { lang: locale } = useParams()
 
+  // Update filtered data when clientes change
+  useEffect(() => {
+    setFilteredData(clientesData)
+  }, [clientesData])
+
   // Helper function to get display name
-  const getDisplayName = (client: ClientType) => {
+  const getDisplayName = (client: Cliente) => {
     if (client.tipo_documento === 'DNI') {
       return client.nombre_completo || `${client.apellido_paterno} ${client.apellido_materno}, ${client.nombres}`
     }
@@ -174,7 +157,7 @@ const ClientListTable = ({ tableData }: { tableData?: ClientType[] }) => {
   }
 
   // Helper function to get display address
-  const getDisplayAddress = (client: ClientType) => {
+  const getDisplayAddress = (client: Cliente) => {
     if (client.tipo_documento === 'RUC') {
       return client.direccion_completa || client.direccion || ''
     }
@@ -294,7 +277,7 @@ const ClientListTable = ({ tableData }: { tableData?: ClientType[] }) => {
         header: 'Acciones',
         cell: ({ row }) => (
           <div className='flex items-center'>
-            <IconButton onClick={() => setData(data?.filter(client => client.id !== row.original.id))}>
+            <IconButton onClick={() => eliminarCliente(row.original.id)}>
               <i className='tabler-trash text-textSecondary' />
             </IconButton>
             <IconButton>
@@ -324,11 +307,11 @@ const ClientListTable = ({ tableData }: { tableData?: ClientType[] }) => {
       })
     ],
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [data, filteredData]
+    [clientesData, filteredData]
   )
 
   const table = useReactTable({
-    data: filteredData as ClientType[],
+    data: filteredData as Cliente[],
     columns,
     filterFns: {
       fuzzy: fuzzyFilter
@@ -359,7 +342,7 @@ const ClientListTable = ({ tableData }: { tableData?: ClientType[] }) => {
     <>
       <Card>
         <CardHeader title='Filtros' className='pbe-4' />
-        <TableFilters setData={setFilteredData} tableData={data} />
+        <TableFilters setData={setFilteredData} tableData={clientesData} />
         <div className='flex justify-between flex-col items-start md:flex-row md:items-center p-6 border-bs gap-4'>
           <CustomTextField
             select
@@ -464,8 +447,6 @@ const ClientListTable = ({ tableData }: { tableData?: ClientType[] }) => {
       <AddClientDrawer
         open={addClientOpen}
         handleClose={() => setAddClientOpen(!addClientOpen)}
-        clientData={data}
-        setData={setData}
       />
     </>
   )

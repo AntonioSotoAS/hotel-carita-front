@@ -18,13 +18,15 @@ import { useForm, Controller } from 'react-hook-form'
 // Component Imports
 import CustomTextField from '@core/components/mui/TextField'
 
+// Contexts
+import { useProductos } from '@/contexts/ProductosContext'
+
 // Types
 import type { Producto } from '@/types/backend.types'
 
 type Props = {
   open: boolean
   handleClose: () => void
-  onAddProduct: (producto: Producto) => void
 }
 
 type FormValidateType = {
@@ -39,7 +41,10 @@ type FormValidateType = {
 
 const AddProductDrawer = (props: Props) => {
   // Props
-  const { open, handleClose, onAddProduct } = props
+  const { open, handleClose } = props
+
+  // Context
+  const { agregarProducto } = useProductos()
 
   // States
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -66,9 +71,8 @@ const AddProductDrawer = (props: Props) => {
     setIsSubmitting(true)
 
     try {
-      // Crear nuevo producto con datos locales - ID autogenerado
-      const nuevoProducto: Producto = {
-        id: Date.now(), // ID autogenerado basado en timestamp
+      // Crear nuevo producto con datos locales - ID será autogenerado por el contexto
+      const nuevoProducto: Omit<Producto, 'id'> = {
         nombre: data.nombre,
         descripcion: data.descripcion || '',
         stock: data.stock,
@@ -81,8 +85,8 @@ const AddProductDrawer = (props: Props) => {
         fechaActualizacion: new Date().toISOString()
       }
 
-      // Llamar a la función callback para agregar el producto
-      onAddProduct(nuevoProducto)
+      // Usar el contexto para agregar el producto (se guarda automáticamente en localStorage)
+      agregarProducto(nuevoProducto)
 
       // Cerrar drawer y resetear form
       handleClose()

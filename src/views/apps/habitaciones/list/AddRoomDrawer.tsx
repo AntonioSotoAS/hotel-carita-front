@@ -15,27 +15,12 @@ import { useForm, Controller } from 'react-hook-form'
 // Component Imports
 import CustomTextField from '@core/components/mui/TextField'
 
-// Types
-type RoomType = {
-  id: number
-  name: string
-  estado: 'ocupada' | 'vacia' | 'en-limpieza' | 'reservada'
-  precio?: number
-  fechaReserva?: string
-  horaReserva?: string
-  fechaCheckIn?: string
-  horaCheckIn?: string
-  fechaCheckOut?: string
-  horaCheckOut?: string
-  huespedNombre?: string
-  huespedDocumento?: string
-}
+// Context Imports
+import { useHabitaciones, type Habitacion } from '@/contexts/HabitacionesContext'
 
 type Props = {
   open: boolean
   handleClose: () => void
-  roomData?: RoomType[]
-  setData: (data: RoomType[]) => void
 }
 
 type FormValidateType = {
@@ -48,7 +33,10 @@ type FormValidateType = {
 
 const AddRoomDrawer = (props: Props) => {
   // Props
-  const { open, handleClose, roomData, setData } = props
+  const { open, handleClose } = props
+
+  // Context
+  const { agregarHabitacion } = useHabitaciones()
 
   // States
   const [selectedEstado, setSelectedEstado] = useState<FormValidateType['estado']>('vacia')
@@ -76,8 +64,7 @@ const AddRoomDrawer = (props: Props) => {
   }, [watchedEstado])
 
   const onSubmit = (data: FormValidateType) => {
-    const newRoom: RoomType = {
-      id: (roomData?.length ? Math.max(...roomData.map(r => r.id)) + 1 : 1),
+    const nuevaHabitacion: Omit<Habitacion, 'id' | 'fechaCreacion'> = {
       name: data.name,
       estado: data.estado,
       precio: data.precio,
@@ -87,7 +74,7 @@ const AddRoomDrawer = (props: Props) => {
       })
     }
 
-    setData([...(roomData ?? []), newRoom])
+    agregarHabitacion(nuevaHabitacion)
     handleClose()
     resetForm({ name: '', estado: 'vacia', precio: 0, fechaReserva: undefined, horaReserva: undefined })
   }

@@ -7,47 +7,53 @@ import type { UserDataType } from '@components/card-statistics/HorizontalWithSub
 // Component Imports
 import HorizontalWithSubtitle from '@components/card-statistics/HorizontalWithSubtitle'
 
-// Vars
-const data: UserDataType[] = [
-  {
-    title: 'Session',
-    stats: '21,459',
-    avatarIcon: 'tabler-users',
-    avatarColor: 'primary',
-    trend: 'positive',
-    trendNumber: '29%',
-    subtitle: 'Total User'
-  },
-  {
-    title: 'Paid Users',
-    stats: '4,567',
-    avatarIcon: 'tabler-user-plus',
-    avatarColor: 'error',
-    trend: 'positive',
-    trendNumber: '18%',
-    subtitle: 'Last week analytics'
-  },
-  {
-    title: 'Active Users',
-    stats: '19,860',
-    avatarIcon: 'tabler-user-check',
-    avatarColor: 'success',
-    trend: 'negative',
-    trendNumber: '14%',
-    subtitle: 'Last week analytics'
-  },
-  {
-    title: 'Pending Users',
-    stats: '237',
-    avatarIcon: 'tabler-user-search',
-    avatarColor: 'warning',
-    trend: 'positive',
-    trendNumber: '42%',
-    subtitle: 'Last week analytics'
-  }
-]
+// Contexts
+import { useProductosEstadisticas } from '@/contexts/ProductosContext'
 
 const UserListCards = () => {
+  // Obtener estadísticas de productos desde localStorage
+  const estadisticas = useProductosEstadisticas()
+
+  // Crear datos dinámicos basados en las estadísticas de productos
+  const data: UserDataType[] = [
+    {
+      title: 'Total Productos',
+      stats: estadisticas.totalProductos.toString(),
+      avatarIcon: 'tabler-package',
+      avatarColor: 'primary',
+      trend: 'positive',
+      trendNumber: '100%',
+      subtitle: 'Productos en inventario'
+    },
+    {
+      title: 'Productos Activos',
+      stats: estadisticas.productosActivos.toString(),
+      avatarIcon: 'tabler-check',
+      avatarColor: 'success',
+      trend: 'positive',
+      trendNumber: `${estadisticas.totalProductos > 0 ? Math.round((estadisticas.productosActivos / estadisticas.totalProductos) * 100) : 0}%`,
+      subtitle: 'Productos disponibles'
+    },
+    {
+      title: 'Bajo Stock',
+      stats: estadisticas.productosBajoStock.toString(),
+      avatarIcon: 'tabler-alert-triangle',
+      avatarColor: 'warning',
+      trend: 'negative',
+      trendNumber: `${estadisticas.totalProductos > 0 ? Math.round((estadisticas.productosBajoStock / estadisticas.totalProductos) * 100) : 0}%`,
+      subtitle: 'Productos con stock bajo'
+    },
+    {
+      title: 'Valor Inventario',
+      stats: `$${estadisticas.valorTotalInventario.toFixed(2)}`,
+      avatarIcon: 'tabler-currency-dollar',
+      avatarColor: 'info',
+      trend: 'positive',
+      trendNumber: '100%',
+      subtitle: 'Valor total del inventario'
+    }
+  ]
+
   return (
     <Grid container spacing={6}>
       {data.map((item, i) => (

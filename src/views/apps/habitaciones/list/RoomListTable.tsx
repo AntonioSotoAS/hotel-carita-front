@@ -58,6 +58,9 @@ import { getLocalizedUrl } from '@/utils/i18n'
 // Style Imports
 import tableStyles from '@core/styles/table.module.css'
 
+// Context Imports
+import { useHabitaciones, type Habitacion } from '@/contexts/HabitacionesContext'
+
 declare module '@tanstack/table-core' {
   interface FilterFns {
     fuzzy: FilterFn<unknown>
@@ -68,22 +71,7 @@ declare module '@tanstack/table-core' {
 }
 
 // Types
-type RoomType = {
-  id: number
-  name: string
-  estado: 'ocupada' | 'vacia' | 'en-limpieza' | 'reservada'
-  precio?: number
-  fechaReserva?: string
-  horaReserva?: string
-  fechaCheckIn?: string
-  horaCheckIn?: string
-  fechaCheckOut?: string
-  horaCheckOut?: string
-  huespedNombre?: string
-  huespedDocumento?: string
-}
-
-type RoomTypeWithAction = RoomType & {
+type RoomTypeWithAction = Habitacion & {
   action?: string
 }
 
@@ -147,23 +135,37 @@ const roomStatusObj: RoomStatusType = {
 // Column Definitions
 const columnHelper = createColumnHelper<RoomTypeWithAction>()
 
-const RoomListTable = ({ tableData }: { tableData?: RoomType[] }) => {
+const RoomListTable = ({ tableData }: { tableData?: Habitacion[] }) => {
+  // Context
+  const {
+    habitaciones: habitacionesData,
+    eliminarHabitacion,
+    cambiarEstadoHabitacion,
+    realizarCheckIn,
+    realizarCheckOut,
+    crearReserva
+  } = useHabitaciones()
+
   // States
   const [addRoomOpen, setAddRoomOpen] = useState(false)
   const [checkInOpen, setCheckInOpen] = useState(false)
   const [checkOutOpen, setCheckOutOpen] = useState(false)
   const [reservaOpen, setReservaOpen] = useState(false)
-  const [selectedRoom, setSelectedRoom] = useState<RoomType | null>(null)
+  const [selectedRoom, setSelectedRoom] = useState<Habitacion | null>(null)
   const [rowSelection, setRowSelection] = useState({})
-  const [data, setData] = useState(...[tableData])
-  const [filteredData, setFilteredData] = useState(data)
+  const [filteredData, setFilteredData] = useState<Habitacion[]>(habitacionesData)
   const [globalFilter, setGlobalFilter] = useState('')
 
   // Hooks
   const { lang: locale } = useParams()
 
+  // Update filtered data when habitaciones change
+  useEffect(() => {
+    setFilteredData(habitacionesData)
+  }, [habitacionesData])
+
   // Helper function to get room status display
-  const getRoomStatusDisplay = (estado: RoomType['estado']) => {
+  const getRoomStatusDisplay = (estado: Habitacion['estado']) => {
     const statusMap = {
       'ocupada': { label: 'Ocupada', icon: 'tabler-user' },
       'vacia': { label: 'Vacía', icon: 'tabler-bed-off' },
@@ -188,73 +190,33 @@ const RoomListTable = ({ tableData }: { tableData?: RoomType[] }) => {
 
   // Handle Check-In
   const handleCheckIn = (roomId: number, checkInData: any) => {
-    const updatedData = data?.map(room =>
-      room.id === roomId
-        ? {
-            ...room,
-            estado: 'ocupada' as const,
-            fechaCheckIn: checkInData.fechaCheckIn,
-            horaCheckIn: checkInData.horaCheckIn,
-            huespedNombre: checkInData.huespedNombre,
-            huespedDocumento: checkInData.huespedDocumento
-          }
-        : room
-    )
-    setData(updatedData || [])
+    realizarCheckIn(roomId, checkInData)
   }
 
   // Handle Check-Out
   const handleCheckOut = (roomId: number, checkOutData: any) => {
-    const updatedData = data?.map(room =>
-      room.id === roomId
-        ? {
-            ...room,
-            estado: checkOutData.requiereLimpieza ? 'en-limpieza' as const : 'vacia' as const,
-            fechaCheckOut: checkOutData.fechaCheckOut,
-            horaCheckOut: checkOutData.horaCheckOut,
-            // Clear guest data after checkout
-            huespedNombre: undefined,
-            huespedDocumento: undefined
-          }
-        : room
-    )
-    setData(updatedData || [])
+    realizarCheckOut(roomId, checkOutData)
   }
 
   // Open Check-In Modal
-  const openCheckInModal = (room: RoomType) => {
+  const openCheckInModal = (room: Habitacion) => {
     setSelectedRoom(room)
     setCheckInOpen(true)
   }
 
   // Open Check-Out Modal
-  const openCheckOutModal = (room: RoomType) => {
+  const openCheckOutModal = (room: Habitacion) => {
     setSelectedRoom(room)
     setCheckOutOpen(true)
   }
 
   // Handle Reserva
   const handleReserva = (roomId: number, reservaData: any) => {
-    const updatedData = data?.map(room =>
-      room.id === roomId
-        ? {
-            ...room,
-            estado: 'reservada' as const,
-            fechaReserva: reservaData.fechaReserva,
-            horaReserva: reservaData.horaReserva,
-            // Clear any previous guest data when creating a new reservation
-            huespedNombre: undefined,
-            huespedDocumento: undefined,
-            fechaCheckIn: undefined,
-            horaCheckIn: undefined
-          }
-        : room
-    )
-    setData(updatedData || [])
+    crearReserva(roomId, reservaData)
   }
 
   // Open Reserva Modal
-  const openReservaModal = (room: RoomType) => {
+  const openReservaModal = (room: Habitacion) => {
     setSelectedRoom(room)
     setReservaOpen(true)
   }
@@ -318,35 +280,15 @@ const RoomListTable = ({ tableData }: { tableData?: RoomType[] }) => {
           const isNearReservation = row.original.estado === 'reservada' &&
                                    isReservationNear(row.original.fechaReserva, row.original.horaReserva)
 
-          const handleEstadoChange = (newEstado: RoomType['estado']) => {
+          const handleEstadoChange = (newEstado: Habitacion['estado']) => {
             // If changing to 'reservada', open the reservation modal
             if (newEstado === 'reservada') {
               openReservaModal(row.original)
               return
             }
 
-            // For other states, change directly
-            const updatedData = data?.map(room =>
-              room.id === row.original.id
-                ? {
-                    ...room,
-                    estado: newEstado,
-                    // Clear reservation data if changing away from 'reservada'
-                    ...(row.original.estado === 'reservada' && {
-                      fechaReserva: undefined,
-                      horaReserva: undefined
-                    }),
-                    // Clear guest data if changing away from 'ocupada'
-                    ...(row.original.estado === 'ocupada' && newEstado !== 'ocupada' && {
-                      huespedNombre: undefined,
-                      huespedDocumento: undefined,
-                      fechaCheckIn: undefined,
-                      horaCheckIn: undefined
-                    })
-                  }
-                : room
-            )
-            setData(updatedData || [])
+            // For other states, change directly using context
+            cambiarEstadoHabitacion(row.original.id, newEstado)
           }
 
           return (
@@ -359,7 +301,7 @@ const RoomListTable = ({ tableData }: { tableData?: RoomType[] }) => {
                 select
                 size='small'
                 value={row.original.estado}
-                onChange={(e) => handleEstadoChange(e.target.value as RoomType['estado'])}
+                onChange={(e) => handleEstadoChange(e.target.value as Habitacion['estado'])}
                 disabled={isNearReservation}
                 sx={{
                   minWidth: 120,
@@ -506,7 +448,7 @@ const RoomListTable = ({ tableData }: { tableData?: RoomType[] }) => {
                 </IconButton>
               )}
 
-              <IconButton onClick={() => setData(data?.filter(room => room.id !== row.original.id))}>
+              <IconButton onClick={() => eliminarHabitacion(row.original.id)}>
                 <i className='tabler-trash text-textSecondary' />
               </IconButton>
               <IconButton>
@@ -537,11 +479,11 @@ const RoomListTable = ({ tableData }: { tableData?: RoomType[] }) => {
       })
     ],
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [data, filteredData]
+    [habitacionesData, filteredData]
   )
 
   const table = useReactTable({
-    data: filteredData as RoomType[],
+    data: filteredData as Habitacion[],
     columns,
     filterFns: {
       fuzzy: fuzzyFilter
@@ -572,7 +514,7 @@ const RoomListTable = ({ tableData }: { tableData?: RoomType[] }) => {
     <>
       <Card>
         <CardHeader title='Filtros' className='pbe-4' />
-        <TableFilters setData={setFilteredData} tableData={data} />
+        <TableFilters setData={setFilteredData} tableData={habitacionesData} />
         <div className='flex justify-between flex-col items-start md:flex-row md:items-center p-6 border-bs gap-4'>
           <CustomTextField
             select
@@ -677,8 +619,6 @@ const RoomListTable = ({ tableData }: { tableData?: RoomType[] }) => {
       <AddRoomDrawer
         open={addRoomOpen}
         handleClose={() => setAddRoomOpen(!addRoomOpen)}
-        roomData={data}
-        setData={setData}
       />
       <CheckInModal
         open={checkInOpen}

@@ -9,16 +9,10 @@ import MenuItem from '@mui/material/MenuItem'
 // Component Imports
 import CustomTextField from '@core/components/mui/TextField'
 
-// Types
-type RoomType = {
-  id: number
-  name: string
-  estado: 'ocupada' | 'vacia' | 'en-limpieza' | 'reservada'
-  fechaReserva?: string
-  horaReserva?: string
-}
+// Context Imports
+import { type Habitacion } from '@/contexts/HabitacionesContext'
 
-const TableFilters = ({ setData, tableData }: { setData: (data: RoomType[]) => void; tableData?: RoomType[] }) => {
+const TableFilters = ({ setData, tableData }: { setData: (data: Habitacion[]) => void; tableData?: Habitacion[] }) => {
   // States
   const [estadoFilter, setEstadoFilter] = useState<string>('')
   const [nameFilter, setNameFilter] = useState<string>('')

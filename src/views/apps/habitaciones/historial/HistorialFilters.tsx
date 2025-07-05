@@ -12,12 +12,17 @@ import CustomTextField from '@core/components/mui/TextField'
 // Local Types
 import type { HistorialHabitacion, FiltrosHistorial, TipoMovimiento } from './types'
 
+// Context Imports
+import { useHistorial } from '@/contexts/HistorialContext'
+
 type Props = {
   setData: (data: HistorialHabitacion[]) => void
-  historialData: HistorialHabitacion[]
 }
 
-const HistorialFilters = ({ setData, historialData }: Props) => {
+const HistorialFilters = ({ setData }: Props) => {
+  // Context
+  const { historial: historialData } = useHistorial()
+
   // States
   const [filtros, setFiltros] = useState<FiltrosHistorial>({
     habitacion: '',

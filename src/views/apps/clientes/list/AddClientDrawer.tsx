@@ -27,39 +27,12 @@ import CustomTextField from '@core/components/mui/TextField'
 // Config Imports
 import { APIPERU_CONFIG, getAuthHeaders } from '@/config/apiperu.config'
 
-// Types
-type ClientType = {
-  id: number
-  tipo_documento: 'DNI' | 'RUC'
-  numero_documento: string
-
-  // Datos para DNI (persona natural)
-  nombres?: string
-  apellido_paterno?: string
-  apellido_materno?: string
-  nombre_completo?: string
-  codigo_verificacion?: string
-
-  // Datos para RUC (empresa)
-  nombre_o_razon_social?: string
-  estado?: string
-  condicion?: string
-  direccion?: string
-  direccion_completa?: string
-  departamento?: string
-  provincia?: string
-  distrito?: string
-  ubigeo_sunat?: string
-  ubigeo?: string[]
-  es_agente_de_retencion?: string
-  es_buen_contribuyente?: string
-}
+// Context Imports
+import { useClientes, type Cliente } from '@/contexts/ClientesContext'
 
 type Props = {
   open: boolean
   handleClose: () => void
-  clientData?: ClientType[]
-  setData: (data: ClientType[]) => void
 }
 
 type FormValidateType = {
@@ -90,7 +63,10 @@ type ModoEntrada = 'manual' | 'api'
 
 const AddClientDrawer = (props: Props) => {
   // Props
-  const { open, handleClose, clientData, setData } = props
+  const { open, handleClose } = props
+
+  // Context
+  const { agregarCliente } = useClientes()
 
   // States
   const [modoEntrada, setModoEntrada] = useState<ModoEntrada>('manual')
@@ -232,8 +208,7 @@ const AddClientDrawer = (props: Props) => {
   }
 
   const onSubmit = (data: FormValidateType) => {
-    const newClient: ClientType = {
-      id: (clientData?.length ? Math.max(...clientData.map(c => c.id)) + 1 : 1),
+    const newClient: Omit<Cliente, 'id' | 'fechaCreacion'> = {
       tipo_documento: data.tipo_documento,
       numero_documento: data.numero_documento,
       ...(data.tipo_documento === 'DNI' ? {
@@ -257,7 +232,7 @@ const AddClientDrawer = (props: Props) => {
       })
     }
 
-    setData([...(clientData ?? []), newClient])
+    agregarCliente(newClient)
     handleClose()
     handleReset()
   }

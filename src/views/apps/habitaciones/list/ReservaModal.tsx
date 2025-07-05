@@ -16,31 +16,14 @@ import { useForm, Controller } from 'react-hook-form'
 // Component Imports
 import CustomTextField from '@core/components/mui/TextField'
 
-// Types
-type RoomType = {
-  id: number
-  name: string
-  estado: 'ocupada' | 'vacia' | 'en-limpieza' | 'reservada'
-  fechaReserva?: string
-  horaReserva?: string
-  fechaCheckIn?: string
-  horaCheckIn?: string
-  fechaCheckOut?: string
-  horaCheckOut?: string
-  huespedNombre?: string
-  huespedDocumento?: string
-}
+// Context Imports
+import { type Habitacion, type ReservaData } from '@/contexts/HabitacionesContext'
 
 type Props = {
   open: boolean
   handleClose: () => void
-  room: RoomType | null
+  room: Habitacion | null
   onReserva: (roomId: number, reservaData: ReservaData) => void
-}
-
-type ReservaData = {
-  fechaReserva: string
-  horaReserva: string
 }
 
 const ReservaModal = ({ open, handleClose, room, onReserva }: Props) => {

@@ -14,23 +14,10 @@ import TabPanel from '@mui/lab/TabPanel'
 import RoomListTable from './RoomListTable'
 import HistorialHabitaciones from '../historial'
 
-// Types
-type RoomType = {
-  id: number
-  name: string
-  estado: 'ocupada' | 'vacia' | 'en-limpieza' | 'reservada'
-  precio?: number
-  fechaReserva?: string
-  horaReserva?: string
-  fechaCheckIn?: string
-  horaCheckIn?: string
-  fechaCheckOut?: string
-  horaCheckOut?: string
-  huespedNombre?: string
-  huespedDocumento?: string
-}
+// Context Imports
+import { type Habitacion } from '@/contexts/HabitacionesContext'
 
-const RoomList = ({ roomData }: { roomData?: RoomType[] }) => {
+const RoomList = ({ roomData }: { roomData?: Habitacion[] }) => {
   // States
   const [activeTab, setActiveTab] = useState('lista')
 

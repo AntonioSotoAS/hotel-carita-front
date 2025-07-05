@@ -1,545 +1,371 @@
 'use client'
 
 // React Imports
-import { useEffect, useState, useMemo } from 'react'
-
-// Next Imports
-import Link from 'next/link'
-import { useParams } from 'next/navigation'
+import { useState, useMemo } from 'react'
 
 // MUI Imports
 import Card from '@mui/material/Card'
 import CardHeader from '@mui/material/CardHeader'
-import Button from '@mui/material/Button'
+import CardContent from '@mui/material/CardContent'
 import Typography from '@mui/material/Typography'
 import Chip from '@mui/material/Chip'
-import Checkbox from '@mui/material/Checkbox'
 import IconButton from '@mui/material/IconButton'
-import { styled } from '@mui/material/styles'
 import TablePagination from '@mui/material/TablePagination'
-import type { TextFieldProps } from '@mui/material/TextField'
-import MenuItem from '@mui/material/MenuItem'
+import TextField from '@mui/material/TextField'
+import InputAdornment from '@mui/material/InputAdornment'
+import Button from '@mui/material/Button'
+import Grid from '@mui/material/Grid'
+import Table from '@mui/material/Table'
+import TableBody from '@mui/material/TableBody'
+import TableCell from '@mui/material/TableCell'
+import TableContainer from '@mui/material/TableContainer'
+import TableHead from '@mui/material/TableHead'
+import TableRow from '@mui/material/TableRow'
+import Paper from '@mui/material/Paper'
+import Box from '@mui/material/Box'
+import Alert from '@mui/material/Alert'
 
 // Third-party Imports
-import classnames from 'classnames'
 import { rankItem } from '@tanstack/match-sorter-utils'
-import {
-  createColumnHelper,
-  flexRender,
-  getCoreRowModel,
-  useReactTable,
-  getFilteredRowModel,
-  getFacetedRowModel,
-  getFacetedUniqueValues,
-  getFacetedMinMaxValues,
-  getPaginationRowModel,
-  getSortedRowModel
-} from '@tanstack/react-table'
-import type { ColumnDef, FilterFn } from '@tanstack/react-table'
-import type { RankingInfo } from '@tanstack/match-sorter-utils'
-
-// Type Imports
-import type { ThemeColor } from '@core/types'
-import type { Locale } from '@configs/i18n'
 
 // Component Imports
-import TableFilters from './TableFilters'
+import CustomAvatar from '@core/components/mui/Avatar'
 import AddProductDrawer from './AddProductDrawer'
-import OptionMenu from '@core/components/option-menu'
-import TablePaginationComponent from '@components/TablePaginationComponent'
-import CustomTextField from '@core/components/mui/TextField'
 
-// Util Imports
-import { getLocalizedUrl } from '@/utils/i18n'
-
-// Style Imports
-import tableStyles from '@core/styles/table.module.css'
+// Context Imports
+import { useProductos } from '@/contexts/ProductosContext'
 
 // Types
 import type { Producto } from '@/types/backend.types'
 
-declare module '@tanstack/table-core' {
-  interface FilterFns {
-    fuzzy: FilterFn<unknown>
-  }
-  interface FilterMeta {
-    itemRank: RankingInfo
-  }
+type ProductoWithActions = Producto & {
+  actions?: string
 }
-
-type ProductoWithAction = Producto & {
-  action?: string
-}
-
-type ProductStockStatusType = {
-  [key: string]: ThemeColor
-}
-
-// Datos de prueba locales
-const productosData: Producto[] = [
-  {
-    id: 1,
-    nombre: 'Coca Cola 500ml',
-    descripcion: 'Bebida gaseosa sabor cola',
-    precio: 3.50,
-    stock: 25,
-    stock_minimo: 5,
-    categoria: 'Bebidas',
-    sku: 'CC500',
-    activo: true,
-    fechaCreacion: new Date().toISOString(),
-    fechaActualizacion: new Date().toISOString()
-  },
-  {
-    id: 2,
-    nombre: 'Inca Kola 500ml',
-    descripcion: 'Bebida gaseosa sabor dorado',
-    precio: 3.50,
-    stock: 3,
-    stock_minimo: 5,
-    categoria: 'Bebidas',
-    sku: 'IK500',
-    activo: true,
-    fechaCreacion: new Date().toISOString(),
-    fechaActualizacion: new Date().toISOString()
-  },
-  {
-    id: 3,
-    nombre: 'Agua San Luis 625ml',
-    descripcion: 'Agua mineral natural',
-    precio: 2.00,
-    stock: 0,
-    stock_minimo: 10,
-    categoria: 'Bebidas',
-    sku: 'ASL625',
-    activo: true,
-    fechaCreacion: new Date().toISOString(),
-    fechaActualizacion: new Date().toISOString()
-  },
-  {
-    id: 4,
-    nombre: 'Papas Lays Original',
-    descripcion: 'Snack de papas fritas clásicas',
-    precio: 4.50,
-    stock: 15,
-    stock_minimo: 5,
-    categoria: 'Snacks',
-    sku: 'PL001',
-    activo: true,
-    fechaCreacion: new Date().toISOString(),
-    fechaActualizacion: new Date().toISOString()
-  },
-  {
-    id: 5,
-    nombre: 'Chocolate Sublime',
-    descripcion: 'Chocolate con leche y maní',
-    precio: 5.00,
-    stock: 20,
-    stock_minimo: 8,
-    categoria: 'Dulces',
-    sku: 'CS001',
-    activo: true,
-    fechaCreacion: new Date().toISOString(),
-    fechaActualizacion: new Date().toISOString()
-  },
-  {
-    id: 6,
-    nombre: 'Galletas Oreo',
-    descripcion: 'Galletas de chocolate con crema',
-    precio: 6.50,
-    stock: 12,
-    stock_minimo: 5,
-    categoria: 'Dulces',
-    sku: 'GO001',
-    activo: true,
-    fechaCreacion: new Date().toISOString(),
-    fechaActualizacion: new Date().toISOString()
-  },
-  {
-    id: 7,
-    nombre: 'Café Nescafé Instantáneo',
-    descripcion: 'Café soluble instantáneo',
-    precio: 8.00,
-    stock: 8,
-    stock_minimo: 3,
-    categoria: 'Bebidas Calientes',
-    sku: 'CN001',
-    activo: true,
-    fechaCreacion: new Date().toISOString(),
-    fechaActualizacion: new Date().toISOString()
-  },
-  {
-    id: 8,
-    nombre: 'Shampoo Head & Shoulders',
-    descripcion: 'Shampoo anticaspa 400ml',
-    precio: 15.00,
-    stock: 6,
-    stock_minimo: 3,
-    categoria: 'Higiene',
-    sku: 'HS400',
-    activo: true,
-    fechaCreacion: new Date().toISOString(),
-    fechaActualizacion: new Date().toISOString()
-  }
-]
-
-// Styled Components
-const Icon = styled('i')({})
-
-const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
-  // Rank the item
-  const itemRank = rankItem(row.getValue(columnId), value)
-
-  // Store the itemRank info
-  addMeta({
-    itemRank
-  })
-
-  // Return if the item should be filtered in/out
-  return itemRank.passed
-}
-
-const DebouncedInput = ({
-  value: initialValue,
-  onChange,
-  debounce = 500,
-  ...props
-}: {
-  value: string | number
-  onChange: (value: string | number) => void
-  debounce?: number
-} & Omit<TextFieldProps, 'onChange'>) => {
-  // States
-  const [value, setValue] = useState(initialValue)
-
-  useEffect(() => {
-    setValue(initialValue)
-  }, [initialValue])
-
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      onChange(value)
-    }, debounce)
-
-    return () => clearTimeout(timeout)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value])
-
-  return <CustomTextField {...props} value={value} onChange={e => setValue(e.target.value)} />
-}
-
-// Vars
-const productStockStatusObj: ProductStockStatusType = {
-  'in-stock': 'success',
-  'low-stock': 'warning',
-  'out-of-stock': 'error'
-}
-
-// Column Definitions
-const columnHelper = createColumnHelper<ProductoWithAction>()
 
 const ProductListTable = () => {
+  // Context
+  const {
+    productos,
+    actualizarProducto,
+    eliminarProducto,
+    obtenerEstadisticas,
+    exportarDatos,
+    importarDatos,
+    limpiarDatos
+  } = useProductos()
+
   // States
   const [addProductOpen, setAddProductOpen] = useState(false)
-  const [rowSelection, setRowSelection] = useState({})
-  const [productos, setProductos] = useState<Producto[]>(productosData)
-  const [filteredData, setFilteredData] = useState<Producto[]>(productosData)
   const [globalFilter, setGlobalFilter] = useState('')
+  const [page, setPage] = useState(0)
+  const [rowsPerPage, setRowsPerPage] = useState(10)
 
-  // Hooks
-  const { lang: locale } = useParams()
+  // Función de filtrado
+  const filteredData = useMemo(() => {
+    if (!globalFilter) return productos
 
-  // Update filtered data when productos change
-  useEffect(() => {
-    setFilteredData(productos)
-  }, [productos])
+    return productos.filter(producto => {
+      const searchTerm = globalFilter.toLowerCase()
+      return (
+        producto.nombre.toLowerCase().includes(searchTerm) ||
+        producto.descripcion?.toLowerCase().includes(searchTerm) ||
+        producto.sku?.toLowerCase().includes(searchTerm) ||
+        producto.categoria?.toLowerCase().includes(searchTerm)
+      )
+    })
+  }, [productos, globalFilter])
 
-  // Helper function to get stock status
-  const getStockStatus = (stock: number, minStock: number = 5) => {
-    if (stock === 0) return { label: 'Agotado', color: 'out-of-stock' as keyof ProductStockStatusType }
-    if (stock <= minStock) return { label: 'Poco Stock', color: 'low-stock' as keyof ProductStockStatusType }
-    return { label: 'En Stock', color: 'in-stock' as keyof ProductStockStatusType }
+  // Datos paginados
+  const paginatedData = useMemo(() => {
+    const start = page * rowsPerPage
+    const end = start + rowsPerPage
+    return filteredData.slice(start, end)
+  }, [filteredData, page, rowsPerPage])
+
+  // Estadísticas
+  const estadisticas = obtenerEstadisticas()
+
+  // Funciones de manejo
+  const handleChangePage = (event: unknown, newPage: number) => {
+    setPage(newPage)
   }
 
-  // Handle delete product
-  const handleDeleteProduct = (id: number) => {
-    setProductos(prev => prev.filter(producto => producto.id !== id))
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setRowsPerPage(parseInt(event.target.value, 10))
+    setPage(0)
   }
 
-  // Handle add product
-  const handleAddProduct = (nuevoProducto: Producto) => {
-    setProductos(prev => [...prev, nuevoProducto])
+  const handleToggleActive = (producto: Producto) => {
+    actualizarProducto(producto.id, { activo: !producto.activo })
   }
 
-  const columns = useMemo<ColumnDef<ProductoWithAction, any>[]>(
-    () => [
-      {
-        id: 'select',
-        header: ({ table }) => (
-          <Checkbox
-            {...{
-              checked: table.getIsAllRowsSelected(),
-              indeterminate: table.getIsSomeRowsSelected(),
-              onChange: table.getToggleAllRowsSelectedHandler()
-            }}
-          />
-        ),
-        cell: ({ row }) => (
-          <Checkbox
-            {...{
-              checked: row.getIsSelected(),
-              disabled: !row.getCanSelect(),
-              indeterminate: row.getIsSomeSelected(),
-              onChange: row.getToggleSelectedHandler()
-            }}
-          />
-        )
-      },
-      columnHelper.accessor('id', {
-        header: 'ID',
-        cell: ({ row }) => (
-          <Typography color='text.secondary' className='font-mono text-xs'>
-            {String(row.original.id).slice(-6)}
-          </Typography>
-        )
-      }),
-      columnHelper.accessor('nombre', {
-        header: 'Nombre del Producto',
-        cell: ({ row }) => (
-          <div className='flex items-center gap-4'>
-            <div className='flex flex-col'>
-              <Typography color='text.primary' className='font-medium'>
-                {row.original.nombre}
-              </Typography>
-              {row.original.descripcion && (
-                <Typography variant='body2' color='text.secondary'>
-                  {row.original.descripcion}
-                </Typography>
-              )}
-            </div>
-          </div>
-        )
-      }),
-      columnHelper.accessor('sku', {
-        header: 'SKU',
-        cell: ({ row }) => (
-          <Typography color='text.primary' className='font-bold text-blue-600'>
-            {row.original.sku || '-'}
-          </Typography>
-        )
-      }),
-      columnHelper.accessor('stock', {
-        header: 'Stock',
-        cell: ({ row }) => {
-          const stockStatus = getStockStatus(row.original.stock, row.original.stock_minimo)
-          return (
-            <div className='flex items-center gap-3'>
-              <Typography className='font-medium' color='text.primary'>
-                {row.original.stock}
-              </Typography>
-              <Chip
-                variant='tonal'
-                label={stockStatus.label}
-                size='small'
-                color={productStockStatusObj[stockStatus.color]}
-                className='capitalize'
-              />
-            </div>
-          )
+  const handleUpdateStock = (producto: Producto, newStock: number) => {
+    actualizarProducto(producto.id, { stock: newStock })
+  }
+
+  const handleExport = () => {
+    const data = exportarDatos()
+    const blob = new Blob([data], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `productos-${new Date().toISOString().split('T')[0]}.json`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  const handleImport = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        const data = e.target?.result as string
+        if (importarDatos(data)) {
+          alert('Productos importados exitosamente')
+        } else {
+          alert('Error al importar productos')
         }
-      }),
-      columnHelper.accessor('precio', {
-        header: 'Precio',
-        cell: ({ row }) => (
-          <Typography color='text.primary'>
-            {row.original.precio ? `S/ ${row.original.precio.toFixed(2)}` : '-'}
-          </Typography>
-        )
-      }),
-      columnHelper.accessor('categoria', {
-        header: 'Categoría',
-        cell: ({ row }) => (
-          <Typography color='text.primary'>
-            {row.original.categoria || '-'}
-          </Typography>
-        )
-      }),
-      columnHelper.accessor('action', {
-        header: 'Acciones',
-        cell: ({ row }) => (
-          <div className='flex items-center'>
-            <IconButton
-              onClick={() => handleDeleteProduct(row.original.id)}
-            >
-              <i className='tabler-trash text-textSecondary' />
-            </IconButton>
-            <IconButton>
-              <Link href={getLocalizedUrl(`/apps/productos/${row.original.id}`, locale as Locale)} className='flex'>
-                <i className='tabler-eye text-textSecondary' />
-              </Link>
-            </IconButton>
-            <OptionMenu
-              iconButtonProps={{ size: 'medium' }}
-              iconClassName='text-textSecondary'
-              options={[
-                {
-                  text: 'Editar',
-                  icon: 'tabler-edit',
-                  menuItemProps: { className: 'flex items-center gap-2 text-textSecondary' }
-                },
-                {
-                  text: 'Actualizar Stock',
-                  icon: 'tabler-package',
-                  menuItemProps: { className: 'flex items-center gap-2 text-textSecondary' }
-                }
-              ]}
-            />
-          </div>
-        ),
-        enableSorting: false
-      })
-    ],
-    [locale]
-  )
-
-  const table = useReactTable({
-    data: filteredData,
-    columns,
-    filterFns: {
-      fuzzy: fuzzyFilter
-    },
-    state: {
-      rowSelection,
-      globalFilter
-    },
-    initialState: {
-      pagination: {
-        pageSize: 10
       }
-    },
-    enableRowSelection: true,
-    globalFilterFn: fuzzyFilter,
-    onRowSelectionChange: setRowSelection,
-    getCoreRowModel: getCoreRowModel(),
-    onGlobalFilterChange: setGlobalFilter,
-    getFilteredRowModel: getFilteredRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getFacetedRowModel: getFacetedRowModel(),
-    getFacetedUniqueValues: getFacetedUniqueValues(),
-    getFacetedMinMaxValues: getFacetedMinMaxValues()
-  })
+      reader.readAsText(file)
+    }
+  }
+
+  const getStockStatusColor = (producto: Producto) => {
+    if (producto.stock <= 0) return 'error'
+    if (producto.stock <= producto.stock_minimo) return 'warning'
+    return 'success'
+  }
+
+  const getStockStatusText = (producto: Producto) => {
+    if (producto.stock <= 0) return 'Sin Stock'
+    if (producto.stock <= producto.stock_minimo) return 'Bajo Stock'
+    return 'En Stock'
+  }
 
   return (
     <>
       <Card>
-        <CardHeader title='Filtros' className='pbe-4' />
-        <TableFilters setData={setFilteredData} tableData={productos} />
-        <div className='flex justify-between flex-col items-start md:flex-row md:items-center p-6 border-bs gap-4'>
-          <CustomTextField
-            select
-            value={table.getState().pagination.pageSize}
-            onChange={e => table.setPageSize(Number(e.target.value))}
-            className='max-sm:is-full sm:is-[70px]'
-          >
-            <MenuItem value='10'>10</MenuItem>
-            <MenuItem value='25'>25</MenuItem>
-            <MenuItem value='50'>50</MenuItem>
-          </CustomTextField>
-          <div className='flex flex-col sm:flex-row max-sm:is-full items-start sm:items-center gap-4'>
-            <DebouncedInput
-              value={globalFilter ?? ''}
-              onChange={value => setGlobalFilter(String(value))}
-              placeholder='Buscar Producto'
-              className='max-sm:is-full'
-            />
-            <Button
-              color='secondary'
-              variant='tonal'
-              startIcon={<i className='tabler-upload' />}
-              className='max-sm:is-full'
-            >
-              Exportar
-            </Button>
-            <Button
-              variant='contained'
-              startIcon={<i className='tabler-plus' />}
-              onClick={() => setAddProductOpen(!addProductOpen)}
-              className='max-sm:is-full'
-            >
-              Agregar Producto
-            </Button>
-          </div>
-        </div>
-        <div className='overflow-x-auto'>
-          <table className={tableStyles.table}>
-            <thead>
-              {table.getHeaderGroups().map(headerGroup => (
-                <tr key={headerGroup.id}>
-                  {headerGroup.headers.map(header => (
-                    <th key={header.id}>
-                      {header.isPlaceholder ? null : (
-                        <>
-                          <div
-                            className={classnames({
-                              'flex items-center': header.column.getIsSorted(),
-                              'cursor-pointer select-none': header.column.getCanSort()
-                            })}
-                            onClick={header.column.getToggleSortingHandler()}
-                          >
-                            {flexRender(header.column.columnDef.header, header.getContext())}
-                            {{
-                              asc: <i className='tabler-chevron-up text-xl' />,
-                              desc: <i className='tabler-chevron-down text-xl' />
-                            }[header.column.getIsSorted() as 'asc' | 'desc'] ?? null}
-                          </div>
-                        </>
-                      )}
-                    </th>
-                  ))}
-                </tr>
-              ))}
-            </thead>
-            {table.getFilteredRowModel().rows.length === 0 ? (
-              <tbody>
-                <tr>
-                  <td colSpan={table.getVisibleFlatColumns().length} className='text-center'>
-                    No hay productos disponibles
-                  </td>
-                </tr>
-              </tbody>
-            ) : (
-              <tbody>
-                {table
-                  .getRowModel()
-                  .rows.slice(0, table.getState().pagination.pageSize)
-                  .map(row => {
-                    return (
-                      <tr key={row.id} className={classnames({ selected: row.getIsSelected() })}>
-                        {row.getVisibleCells().map(cell => (
-                          <td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>
-                        ))}
-                      </tr>
-                    )
-                  })}
-              </tbody>
-            )}
-          </table>
-        </div>
-        <TablePagination
-          component={() => <TablePaginationComponent table={table} />}
-          count={table.getFilteredRowModel().rows.length}
-          rowsPerPage={table.getState().pagination.pageSize}
-          page={table.getState().pagination.pageIndex}
-          onPageChange={(_, page) => {
-            table.setPageIndex(page)
-          }}
+        <CardHeader
+          title="Gestión de Productos"
+          subheader="Administra tu inventario con persistencia en localStorage"
         />
+        <CardContent>
+          {/* Estadísticas resumidas */}
+          <Grid container spacing={3} sx={{ mb: 3 }}>
+            <Grid item xs={12} sm={6} md={3}>
+              <Box sx={{ textAlign: 'center', p: 2, border: 1, borderRadius: 1, borderColor: 'divider' }}>
+                <Typography variant="h4" color="primary">{estadisticas.totalProductos}</Typography>
+                <Typography variant="body2">Total Productos</Typography>
+              </Box>
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <Box sx={{ textAlign: 'center', p: 2, border: 1, borderRadius: 1, borderColor: 'divider' }}>
+                <Typography variant="h4" color="success.main">{estadisticas.productosActivos}</Typography>
+                <Typography variant="body2">Productos Activos</Typography>
+              </Box>
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <Box sx={{ textAlign: 'center', p: 2, border: 1, borderRadius: 1, borderColor: 'divider' }}>
+                <Typography variant="h4" color="warning.main">{estadisticas.productosBajoStock}</Typography>
+                <Typography variant="body2">Bajo Stock</Typography>
+              </Box>
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <Box sx={{ textAlign: 'center', p: 2, border: 1, borderRadius: 1, borderColor: 'divider' }}>
+                <Typography variant="h4" color="info.main">${estadisticas.valorTotalInventario.toFixed(2)}</Typography>
+                <Typography variant="body2">Valor Total</Typography>
+              </Box>
+            </Grid>
+          </Grid>
+
+          {/* Barra de herramientas */}
+          <Grid container spacing={2} sx={{ mb: 3 }} alignItems="center">
+            <Grid item xs={12} sm={4}>
+              <TextField
+                fullWidth
+                placeholder="Buscar productos..."
+                value={globalFilter}
+                onChange={(e) => setGlobalFilter(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <i className="tabler-search" />
+                    </InputAdornment>
+                  )
+                }}
+              />
+            </Grid>
+            <Grid item xs={12} sm={8}>
+              <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                <Button
+                  variant="contained"
+                  startIcon={<i className="tabler-plus" />}
+                  onClick={() => setAddProductOpen(true)}
+                >
+                  Agregar Producto
+                </Button>
+                <Button
+                  variant="outlined"
+                  startIcon={<i className="tabler-download" />}
+                  onClick={handleExport}
+                >
+                  Exportar
+                </Button>
+                <Button
+                  variant="outlined"
+                  component="label"
+                  startIcon={<i className="tabler-upload" />}
+                >
+                  Importar
+                  <input
+                    type="file"
+                    accept=".json"
+                    onChange={handleImport}
+                    hidden
+                  />
+                </Button>
+                <Button
+                  variant="outlined"
+                  color="error"
+                  startIcon={<i className="tabler-trash" />}
+                  onClick={() => {
+                    if (confirm('¿Estás seguro de que quieres limpiar todos los productos?')) {
+                      limpiarDatos()
+                    }
+                  }}
+                >
+                  Limpiar Todo
+                </Button>
+              </Box>
+            </Grid>
+          </Grid>
+
+          {productos.length === 0 ? (
+            <Alert severity="info" sx={{ mb: 3 }}>
+              No hay productos en el inventario. ¡Agrega tu primer producto para comenzar!
+            </Alert>
+          ) : null}
+
+          {/* Tabla de productos */}
+          <TableContainer component={Paper} variant="outlined">
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Producto</TableCell>
+                  <TableCell>SKU</TableCell>
+                  <TableCell>Categoría</TableCell>
+                  <TableCell align="right">Precio</TableCell>
+                  <TableCell align="center">Stock</TableCell>
+                  <TableCell align="center">Estado</TableCell>
+                  <TableCell align="center">Acciones</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {paginatedData.map((producto) => (
+                  <TableRow key={producto.id}>
+                    <TableCell>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                        <CustomAvatar skin="light" color="primary" size={40}>
+                          <i className="tabler-package" />
+                        </CustomAvatar>
+                        <Box>
+                          <Typography variant="h6" sx={{ fontSize: '0.875rem' }}>
+                            {producto.nombre}
+                          </Typography>
+                          {producto.descripcion && (
+                            <Typography variant="body2" color="text.secondary">
+                              {producto.descripcion}
+                            </Typography>
+                          )}
+                        </Box>
+                      </Box>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
+                        {producto.sku || 'N/A'}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Chip
+                        label={producto.categoria || 'Sin categoría'}
+                        variant="tonal"
+                        size="small"
+                        color="primary"
+                      />
+                    </TableCell>
+                    <TableCell align="right">
+                      <Typography variant="h6" sx={{ fontSize: '0.875rem' }}>
+                        ${producto.precio?.toFixed(2) || '0.00'}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="center">
+                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+                        <Chip
+                          label={`${producto.stock} / ${producto.stock_minimo}`}
+                          size="small"
+                          color={getStockStatusColor(producto)}
+                        />
+                      </Box>
+                      <Typography variant="caption" color="text.secondary">
+                        {getStockStatusText(producto)}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="center">
+                      <Chip
+                        label={producto.activo ? 'Activo' : 'Inactivo'}
+                        variant="tonal"
+                        size="small"
+                        color={producto.activo ? 'success' : 'secondary'}
+                      />
+                    </TableCell>
+                    <TableCell align="center">
+                      <Box sx={{ display: 'flex', gap: 1 }}>
+                        <IconButton
+                          size="small"
+                          onClick={() => handleToggleActive(producto)}
+                          color={producto.activo ? 'error' : 'success'}
+                        >
+                          <i className={producto.activo ? 'tabler-eye-off' : 'tabler-eye'} />
+                        </IconButton>
+                        <IconButton
+                          size="small"
+                          onClick={() => {
+                            const newStock = prompt(`Stock actual: ${producto.stock}. Ingresa el nuevo stock:`)
+                            if (newStock !== null && !isNaN(Number(newStock))) {
+                              handleUpdateStock(producto, Number(newStock))
+                            }
+                          }}
+                          color="primary"
+                        >
+                          <i className="tabler-edit" />
+                        </IconButton>
+                      </Box>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+
+          {/* Paginación */}
+          <TablePagination
+            rowsPerPageOptions={[5, 10, 25, 50]}
+            component="div"
+            count={filteredData.length}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+            labelRowsPerPage="Filas por página:"
+            labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count}`}
+          />
+        </CardContent>
       </Card>
+
+      {/* Drawer para agregar producto */}
       <AddProductDrawer
         open={addProductOpen}
-        handleClose={() => setAddProductOpen(!addProductOpen)}
-        onAddProduct={handleAddProduct}
+        handleClose={() => setAddProductOpen(false)}
       />
     </>
   )

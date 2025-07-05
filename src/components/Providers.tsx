@@ -7,6 +7,11 @@ import { VerticalNavProvider } from '@menu/contexts/verticalNavContext'
 import { SettingsProvider } from '@core/contexts/settingsContext'
 import ThemeProvider from '@components/theme'
 import ReduxProvider from '@/redux-store/ReduxProvider'
+import { EcommerceProvider } from '@/contexts/EcommerceContext'
+import { ProductosProvider } from '@/contexts/ProductosContext'
+import { HistorialProvider } from '@/contexts/HistorialContext'
+import { ClientesProvider } from '@/contexts/ClientesContext'
+import { HabitacionesProvider } from '@/contexts/HabitacionesContext'
 
 // Styled Component Imports
 import AppReactToastify from '@/libs/styles/AppReactToastify'
@@ -32,7 +37,17 @@ const Providers = (props: Props) => {
       <VerticalNavProvider>
         <SettingsProvider settingsCookie={settingsCookie} mode={mode}>
           <ThemeProvider direction={direction} systemMode={systemMode}>
-            <ReduxProvider>{children}</ReduxProvider>
+            <EcommerceProvider>
+              <ProductosProvider>
+                <HistorialProvider>
+                  <HabitacionesProvider>
+                    <ClientesProvider>
+                      <ReduxProvider>{children}</ReduxProvider>
+                    </ClientesProvider>
+                  </HabitacionesProvider>
+                </HistorialProvider>
+              </ProductosProvider>
+            </EcommerceProvider>
             <AppReactToastify direction={direction} hideProgressBar />
           </ThemeProvider>
         </SettingsProvider>

@@ -45,6 +45,9 @@ import tableStyles from '@core/styles/table.module.css'
 import type { HistorialHabitacion, TipoMovimiento } from './types'
 import HistorialFilters from './HistorialFilters'
 
+// Context Imports
+import { useHistorial } from '@/contexts/HistorialContext'
+
 declare module '@tanstack/table-core' {
   interface FilterFns {
     fuzzy: FilterFn<unknown>
@@ -58,89 +61,7 @@ type MovimientoColorType = {
   [key in TipoMovimiento]: ThemeColor
 }
 
-// Datos de prueba para el historial
-const historialData: HistorialHabitacion[] = [
-  {
-    id: 1,
-    habitacionId: 101,
-    habitacionNombre: 'Habitación 101',
-    tipoMovimiento: 'check_in',
-    estadoAnterior: 'reservada',
-    estadoNuevo: 'ocupada',
-    huespedNombre: 'Juan Pérez',
-    huespedDocumento: '12345678',
-    fecha: '2024-01-15',
-    hora: '14:30',
-    observaciones: 'Check-in normal',
-    usuario: 'Recepcionista 1'
-  },
-  {
-    id: 2,
-    habitacionId: 102,
-    habitacionNombre: 'Habitación 102',
-    tipoMovimiento: 'cambio_estado',
-    estadoAnterior: 'ocupada',
-    estadoNuevo: 'en-limpieza',
-    fecha: '2024-01-15',
-    hora: '11:00',
-    observaciones: 'Requiere limpieza profunda',
-    usuario: 'Ama de llaves'
-  },
-  {
-    id: 3,
-    habitacionId: 101,
-    habitacionNombre: 'Habitación 101',
-    tipoMovimiento: 'check_out',
-    estadoAnterior: 'ocupada',
-    estadoNuevo: 'en-limpieza',
-    huespedNombre: 'Juan Pérez',
-    huespedDocumento: '12345678',
-    fecha: '2024-01-16',
-    hora: '12:00',
-    observaciones: 'Check-out normal',
-    usuario: 'Recepcionista 2'
-  },
-  {
-    id: 4,
-    habitacionId: 103,
-    habitacionNombre: 'Habitación 103',
-    tipoMovimiento: 'reserva',
-    estadoAnterior: 'vacia',
-    estadoNuevo: 'reservada',
-    huespedNombre: 'María García',
-    huespedDocumento: '87654321',
-    fecha: '2024-01-16',
-    hora: '16:45',
-    observaciones: 'Reserva para el 18/01',
-    usuario: 'Recepcionista 1'
-  },
-  {
-    id: 5,
-    habitacionId: 102,
-    habitacionNombre: 'Habitación 102',
-    tipoMovimiento: 'cambio_estado',
-    estadoAnterior: 'en-limpieza',
-    estadoNuevo: 'vacia',
-    fecha: '2024-01-16',
-    hora: '15:30',
-    observaciones: 'Limpieza completada',
-    usuario: 'Ama de llaves'
-  },
-  {
-    id: 6,
-    habitacionId: 104,
-    habitacionNombre: 'Habitación 104',
-    tipoMovimiento: 'cancelacion',
-    estadoAnterior: 'reservada',
-    estadoNuevo: 'vacia',
-    huespedNombre: 'Carlos López',
-    huespedDocumento: '11223344',
-    fecha: '2024-01-17',
-    hora: '09:15',
-    observaciones: 'Cliente canceló la reserva',
-    usuario: 'Recepcionista 2'
-  }
-]
+// Datos de prueba para el historial - ahora se cargan desde el contexto
 
 // Styled Components
 const Icon = styled('i')({})
@@ -199,6 +120,9 @@ const movimientoLabelObj: Record<TipoMovimiento, string> = {
 const columnHelper = createColumnHelper<HistorialHabitacion>()
 
 const HistorialTable = () => {
+  // Context
+  const { historial: historialData } = useHistorial()
+
   // States
   const [filteredData, setFilteredData] = useState<HistorialHabitacion[]>(historialData)
   const [globalFilter, setGlobalFilter] = useState('')
@@ -206,7 +130,7 @@ const HistorialTable = () => {
   // Update filtered data when historialData changes
   useEffect(() => {
     setFilteredData(historialData)
-  }, [])
+  }, [historialData])
 
   const columns = useMemo<ColumnDef<HistorialHabitacion, any>[]>(
     () => [
@@ -352,7 +276,7 @@ const HistorialTable = () => {
     <>
       <Card>
         <CardHeader title='Filtros' className='pbe-4' />
-        <HistorialFilters setData={setFilteredData} historialData={historialData} />
+        <HistorialFilters setData={setFilteredData} />
         <div className='flex justify-between flex-col items-start md:flex-row md:items-center p-6 border-bs gap-4'>
           <CustomTextField
             select

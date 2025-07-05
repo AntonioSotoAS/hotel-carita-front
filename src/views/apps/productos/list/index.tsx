@@ -1,14 +1,18 @@
+'use client'
+
+// Component Imports
+import UserListCards from './UserListCards'
+import ProductListTable from './ProductListTable'
+
 // MUI Imports
 import Grid from '@mui/material/Grid'
 
-// Component Imports
-import ProductListTable from './ProductListTable'
-
-const ProductList = () => {
+const ProductosPage = () => {
   return (
     <Grid container spacing={6}>
-
-
+      <Grid item xs={12}>
+        <UserListCards />
+      </Grid>
       <Grid item xs={12}>
         <ProductListTable />
       </Grid>
@@ -16,4 +20,4 @@ const ProductList = () => {
   )
 }
 
-export default ProductList
+export default ProductosPage
