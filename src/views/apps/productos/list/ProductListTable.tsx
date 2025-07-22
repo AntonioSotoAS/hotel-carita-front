@@ -31,6 +31,11 @@ import { rankItem } from '@tanstack/match-sorter-utils'
 // Component Imports
 import CustomAvatar from '@core/components/mui/Avatar'
 import AddProductDrawer from './AddProductDrawer'
+import EditProductDrawer from './EditProductDrawer'
+import ExportMenu from './ExportMenu'
+
+// Hook Imports
+import { useUserRole } from '@/hooks/useUserRole'
 
 // Context Imports
 import { useProductos } from '@/contexts/ProductosContext'
@@ -54,8 +59,13 @@ const ProductListTable = () => {
     limpiarDatos
   } = useProductos()
 
+  // Hook para obtener el rol del usuario
+  const { isAdmin } = useUserRole()
+
   // States
   const [addProductOpen, setAddProductOpen] = useState(false)
+  const [editProductOpen, setEditProductOpen] = useState(false)
+  const [selectedProduct, setSelectedProduct] = useState<Producto | null>(null)
   const [globalFilter, setGlobalFilter] = useState('')
   const [page, setPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(10)
@@ -103,16 +113,17 @@ const ProductListTable = () => {
     actualizarProducto(producto.id, { stock: newStock })
   }
 
-  const handleExport = () => {
-    const data = exportarDatos()
-    const blob = new Blob([data], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `productos-${new Date().toISOString().split('T')[0]}.json`
-    a.click()
-    URL.revokeObjectURL(url)
+  const handleEditProduct = (producto: Producto) => {
+    setSelectedProduct(producto)
+    setEditProductOpen(true)
   }
+
+  const handleCloseEditDrawer = () => {
+    setEditProductOpen(false)
+    setSelectedProduct(null)
+  }
+
+
 
   const handleImport = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -172,7 +183,7 @@ const ProductListTable = () => {
             </Grid>
             <Grid item xs={12} sm={6} md={3}>
               <Box sx={{ textAlign: 'center', p: 2, border: 1, borderRadius: 1, borderColor: 'divider' }}>
-                <Typography variant="h4" color="info.main">${estadisticas.valorTotalInventario.toFixed(2)}</Typography>
+                <Typography variant="h4" color="info.main">S/.{estadisticas.valorTotalInventario.toFixed(2)}</Typography>S/.
                 <Typography variant="body2">Valor Total</Typography>
               </Box>
             </Grid>
@@ -197,45 +208,17 @@ const ProductListTable = () => {
             </Grid>
             <Grid item xs={12} sm={8}>
               <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                <Button
-                  variant="contained"
-                  startIcon={<i className="tabler-plus" />}
-                  onClick={() => setAddProductOpen(true)}
-                >
-                  Agregar Producto
-                </Button>
-                <Button
-                  variant="outlined"
-                  startIcon={<i className="tabler-download" />}
-                  onClick={handleExport}
-                >
-                  Exportar
-                </Button>
-                <Button
-                  variant="outlined"
-                  component="label"
-                  startIcon={<i className="tabler-upload" />}
-                >
-                  Importar
-                  <input
-                    type="file"
-                    accept=".json"
-                    onChange={handleImport}
-                    hidden
-                  />
-                </Button>
-                <Button
-                  variant="outlined"
-                  color="error"
-                  startIcon={<i className="tabler-trash" />}
-                  onClick={() => {
-                    if (confirm('¿Estás seguro de que quieres limpiar todos los productos?')) {
-                      limpiarDatos()
-                    }
-                  }}
-                >
-                  Limpiar Todo
-                </Button>
+                {/* Botón Agregar Producto - Solo visible para admin */}
+                {isAdmin && (
+                  <Button
+                    variant="contained"
+                    startIcon={<i className="tabler-plus" />}
+                    onClick={() => setAddProductOpen(true)}
+                  >
+                    Agregar Producto
+                  </Button>
+                )}
+                <ExportMenu productos={productos} />
               </Box>
             </Grid>
           </Grid>
@@ -295,7 +278,7 @@ const ProductListTable = () => {
                     </TableCell>
                     <TableCell align="right">
                       <Typography variant="h6" sx={{ fontSize: '0.875rem' }}>
-                        ${producto.precio?.toFixed(2) || '0.00'}
+                        S/.{producto.precio?.toFixed(2) || '0.00'}
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
@@ -320,25 +303,17 @@ const ProductListTable = () => {
                     </TableCell>
                     <TableCell align="center">
                       <Box sx={{ display: 'flex', gap: 1 }}>
-                        <IconButton
-                          size="small"
-                          onClick={() => handleToggleActive(producto)}
-                          color={producto.activo ? 'error' : 'success'}
-                        >
-                          <i className={producto.activo ? 'tabler-eye-off' : 'tabler-eye'} />
-                        </IconButton>
-                        <IconButton
-                          size="small"
-                          onClick={() => {
-                            const newStock = prompt(`Stock actual: ${producto.stock}. Ingresa el nuevo stock:`)
-                            if (newStock !== null && !isNaN(Number(newStock))) {
-                              handleUpdateStock(producto, Number(newStock))
-                            }
-                          }}
-                          color="primary"
-                        >
-                          <i className="tabler-edit" />
-                        </IconButton>
+                        {/* Botón Editar - Solo visible para admin */}
+                        {isAdmin && (
+                          <IconButton
+                            size="small"
+                            onClick={() => handleEditProduct(producto)}
+                            color="primary"
+                            title="Editar producto"
+                          >
+                            <i className="tabler-edit" />
+                          </IconButton>
+                        )}
                       </Box>
                     </TableCell>
                   </TableRow>
@@ -366,6 +341,13 @@ const ProductListTable = () => {
       <AddProductDrawer
         open={addProductOpen}
         handleClose={() => setAddProductOpen(false)}
+      />
+
+      {/* Drawer para editar producto */}
+      <EditProductDrawer
+        open={editProductOpen}
+        handleClose={handleCloseEditDrawer}
+        producto={selectedProduct}
       />
     </>
   )

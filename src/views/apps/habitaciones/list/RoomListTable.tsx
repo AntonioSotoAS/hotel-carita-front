@@ -48,6 +48,7 @@ import AddRoomDrawer from './AddRoomDrawer'
 import CheckInModal from './CheckInModal'
 import CheckOutModal from './CheckOutModal'
 import ReservaModal from './ReservaModal'
+import ExportHabitacionesMenu from './ExportHabitacionesMenu'
 import OptionMenu from '@core/components/option-menu'
 import TablePaginationComponent from '@components/TablePaginationComponent'
 import CustomTextField from '@core/components/mui/TextField'
@@ -533,14 +534,7 @@ const RoomListTable = ({ tableData }: { tableData?: Habitacion[] }) => {
               placeholder='Buscar Habitación'
               className='max-sm:is-full'
             />
-            <Button
-              color='secondary'
-              variant='tonal'
-              startIcon={<i className='tabler-upload' />}
-              className='max-sm:is-full'
-            >
-              Exportar
-            </Button>
+            <ExportHabitacionesMenu habitaciones={habitacionesData} />
             <Button
               variant='contained'
               startIcon={<i className='tabler-plus' />}

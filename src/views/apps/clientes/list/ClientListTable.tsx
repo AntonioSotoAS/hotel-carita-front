@@ -45,6 +45,7 @@ import type { Locale } from '@configs/i18n'
 // Component Imports
 import TableFilters from './TableFilters'
 import AddClientDrawer from './AddClientDrawer'
+import ExportClientesMenu from './ExportClientesMenu'
 import OptionMenu from '@core/components/option-menu'
 import TablePaginationComponent from '@components/TablePaginationComponent'
 import CustomTextField from '@core/components/mui/TextField'
@@ -280,27 +281,6 @@ const ClientListTable = ({ tableData }: { tableData?: Cliente[] }) => {
             <IconButton onClick={() => eliminarCliente(row.original.id)}>
               <i className='tabler-trash text-textSecondary' />
             </IconButton>
-            <IconButton>
-              <Link href={getLocalizedUrl('/apps/clientes/view', locale as Locale)} className='flex'>
-                <i className='tabler-eye text-textSecondary' />
-              </Link>
-            </IconButton>
-            <OptionMenu
-              iconButtonProps={{ size: 'medium' }}
-              iconClassName='text-textSecondary'
-              options={[
-                {
-                  text: 'Editar',
-                  icon: 'tabler-edit',
-                  menuItemProps: { className: 'flex items-center gap-2 text-textSecondary' }
-                },
-                {
-                  text: 'Duplicar',
-                  icon: 'tabler-copy',
-                  menuItemProps: { className: 'flex items-center gap-2 text-textSecondary' }
-                }
-              ]}
-            />
           </div>
         ),
         enableSorting: false
@@ -361,14 +341,7 @@ const ClientListTable = ({ tableData }: { tableData?: Cliente[] }) => {
               placeholder='Buscar Cliente'
               className='max-sm:is-full'
             />
-            <Button
-              color='secondary'
-              variant='tonal'
-              startIcon={<i className='tabler-upload' />}
-              className='max-sm:is-full'
-            >
-              Exportar
-            </Button>
+            <ExportClientesMenu clientes={clientesData} />
             <Button
               variant='contained'
               startIcon={<i className='tabler-plus' />}

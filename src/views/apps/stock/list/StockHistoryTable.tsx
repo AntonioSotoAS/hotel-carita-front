@@ -44,6 +44,7 @@ import type { ThemeColor } from '@core/types'
 import OptionMenu from '@core/components/option-menu'
 import TablePaginationComponent from '@components/TablePaginationComponent'
 import CustomTextField from '@core/components/mui/TextField'
+import ExportStockMenu from './ExportStockMenu'
 
 // Style Imports
 import tableStyles from '@core/styles/table.module.css'
@@ -340,33 +341,6 @@ const StockHistoryTable = ({ tableData }: { tableData?: StockMovementType[] }) =
           </Typography>
         )
       }),
-      columnHelper.accessor('action', {
-        header: 'Acciones',
-        cell: ({ row }) => (
-          <div className='flex items-center'>
-            <IconButton onClick={() => setData(data?.filter(movement => movement.id !== row.original.id))}>
-              <i className='tabler-trash text-textSecondary' />
-            </IconButton>
-            <OptionMenu
-              iconButtonProps={{ size: 'medium' }}
-              iconClassName='text-textSecondary'
-              options={[
-                {
-                  text: 'Ver Detalles',
-                  icon: 'tabler-eye',
-                  menuItemProps: { className: 'flex items-center gap-2 text-textSecondary' }
-                },
-                {
-                  text: 'Editar',
-                  icon: 'tabler-edit',
-                  menuItemProps: { className: 'flex items-center gap-2 text-textSecondary' }
-                }
-              ]}
-            />
-          </div>
-        ),
-        enableSorting: false
-      })
     ],
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [data, filteredData]
@@ -423,14 +397,7 @@ const StockHistoryTable = ({ tableData }: { tableData?: StockMovementType[] }) =
               placeholder='Buscar en historial'
               className='max-sm:is-full'
             />
-            <Button
-              color='secondary'
-              variant='tonal'
-              startIcon={<i className='tabler-upload' />}
-              className='max-sm:is-full'
-            >
-              Exportar
-            </Button>
+            <ExportStockMenu stockHistory={data} />
             <Button
               variant='contained'
               startIcon={<i className='tabler-plus' />}

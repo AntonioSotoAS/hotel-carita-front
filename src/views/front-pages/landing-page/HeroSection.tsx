@@ -106,7 +106,6 @@ const HeroSection = ({ mode }: { mode: SystemMode }) => {
         style={{ transform: isAboveLgScreen ? transform : 'none' }}
       >
         <Link href='/' target='_blank' className='block relative'>
-          <img src={dashboardImage} alt='dashboard-image' className={classnames('mli-auto', styles.heroSecDashboard)} />
           <div className={classnames('absolute', styles.heroSectionElements)}>
             <img src={elementsImage} alt='dashboard-elements' />
           </div>

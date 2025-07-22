@@ -194,14 +194,34 @@ const Login = ({ mode }: { mode: SystemMode }) => {
         // Obtener la sesión para acceder al token
         const session = await getSession()
         console.log('🔍 FRONTEND: Sesión obtenida:', session)
+        console.log('🔍 FRONTEND: Datos del usuario en sesión:', {
+          id: session?.user?.id,
+          email: session?.user?.email,
+          name: session?.user?.name,
+          rol: session?.user?.rol,
+          accessToken: session?.user?.accessToken ? 'Presente' : 'Ausente'
+        })
 
         // Guardar el token en localStorage
         if (session?.user?.accessToken) {
-          localStorage.setItem('token', session.user.accessToken)
+          localStorage.setItem('accessToken', session.user.accessToken)
           console.log('✅ FRONTEND: Token guardado en localStorage')
         }
 
-        const redirectURL = searchParams.get('redirectTo') ?? '/dashboards/analytics'
+                // Guardar información del usuario en localStorage
+        if (session?.user) {
+          const userData = {
+            id: session.user.id,
+            email: session.user.email,
+            name: session.user.name,
+            rol: session.user.rol || 'user' // Usar 'rol' que viene del backend
+          }
+
+          localStorage.setItem('user', JSON.stringify(userData))
+          console.log('✅ FRONTEND: Información del usuario guardada en localStorage:', userData)
+        }
+
+        const redirectURL = searchParams.get('redirectTo') ?? '/apps/habitaciones/list'
 
         // Simplificar la URL para evitar problemas con i18n
         let finalURL = redirectURL

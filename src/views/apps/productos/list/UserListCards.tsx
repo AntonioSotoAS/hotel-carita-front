@@ -45,8 +45,8 @@ const UserListCards = () => {
     },
     {
       title: 'Valor Inventario',
-      stats: `$${estadisticas.valorTotalInventario.toFixed(2)}`,
-      avatarIcon: 'tabler-currency-dollar',
+      stats: `S/.${estadisticas.valorTotalInventario.toFixed(2)}`,
+      avatarIcon: 'tabler-check',
       avatarColor: 'info',
       trend: 'positive',
       trendNumber: '100%',

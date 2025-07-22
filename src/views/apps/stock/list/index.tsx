@@ -53,7 +53,7 @@ const stockStatsData: UserDataType[] = [
   {
     title: 'Valor Total Movimientos',
     stats: 'S/.4,267',
-    avatarIcon: 'tabler-currency-dollar',
+    avatarIcon: 'tabler-arrow-up',
     avatarColor: 'info',
     trend: 'positive',
     trendNumber: '15%',

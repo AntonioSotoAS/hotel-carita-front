@@ -37,6 +37,7 @@ import type { ThemeColor } from '@core/types'
 // Component Imports
 import TablePaginationComponent from '@components/TablePaginationComponent'
 import CustomTextField from '@core/components/mui/TextField'
+import ExportHistorialMenu from './ExportHistorialMenu'
 
 // Style Imports
 import tableStyles from '@core/styles/table.module.css'
@@ -278,16 +279,19 @@ const HistorialTable = () => {
         <CardHeader title='Filtros' className='pbe-4' />
         <HistorialFilters setData={setFilteredData} />
         <div className='flex justify-between flex-col items-start md:flex-row md:items-center p-6 border-bs gap-4'>
-          <CustomTextField
-            select
-            value={table.getState().pagination.pageSize}
-            onChange={e => table.setPageSize(Number(e.target.value))}
-            className='max-sm:is-full sm:is-[70px]'
-          >
-            <MenuItem value='10'>10</MenuItem>
-            <MenuItem value='25'>25</MenuItem>
-            <MenuItem value='50'>50</MenuItem>
-          </CustomTextField>
+          <div className='flex items-center gap-4'>
+            <CustomTextField
+              select
+              value={table.getState().pagination.pageSize}
+              onChange={e => table.setPageSize(Number(e.target.value))}
+              className='max-sm:is-full sm:is-[70px]'
+            >
+              <MenuItem value='10'>10</MenuItem>
+              <MenuItem value='25'>25</MenuItem>
+              <MenuItem value='50'>50</MenuItem>
+            </CustomTextField>
+            <ExportHistorialMenu historial={historialData} />
+          </div>
           <div className='flex flex-col sm:flex-row max-sm:is-full items-start sm:items-center gap-4'>
             <DebouncedInput
               value={globalFilter ?? ''}

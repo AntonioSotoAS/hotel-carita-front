@@ -20,6 +20,7 @@ import HorizontalFooter from '@components/layout/horizontal/Footer'
 import Customizer from '@core/components/customizer'
 import ScrollToTop from '@core/components/scroll-to-top'
 import AuthGuard from '@/hocs/AuthGuard'
+import RoleDebug from '@components/RoleDebug'
 
 // Config Imports
 import { i18n } from '@/configs/i18n'
@@ -64,6 +65,7 @@ const Layout = async ({ children, params }: ChildrenType & { params: { lang: Loc
           </Button>
         </ScrollToTop>
         <Customizer dir={direction} />
+        <RoleDebug />
       </AuthGuard>
     </Providers>
   )
